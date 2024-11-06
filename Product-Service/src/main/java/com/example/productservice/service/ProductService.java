@@ -15,9 +15,13 @@ public interface ProductService {
     ProductDto updateProduct(Long productCode, ProductDto dto);
     void deleteProduct(Long productCode);
     ProductDto getProduct(Long productCode);
+    ProductDto getProductCached(Long productCode);
     PageDto<List<ProductResponse>> getAllProducts(int page, int size);
     void move(Long first, Long second);
     PageDto<List<ProductResponse>> filterProducts(String name, String category, Double minPrice,
                                                           Double maxPrice, String colour, Double minRating, Double maxRating,
                                                           Boolean isFeatured, Boolean isDiscounted, int page, int size);
+    PageDto<List<ProductResponse>> getCachedFilteredProducts(String name, String category, Double minPrice,
+                                                                    Double maxPrice, String colour, Double minRating, Double maxRating,
+                                                                    Boolean isFeatured, Boolean isDiscounted, int page, int size);
 }

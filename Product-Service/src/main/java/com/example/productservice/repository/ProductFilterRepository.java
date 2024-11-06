@@ -34,22 +34,28 @@ public class ProductFilterRepository {
         if (category != null && !category.isEmpty()) {
             query.addCriteria(Criteria.where("category").is(category));
         }
-        if (minPrice != null) {
+        if (minPrice != null && maxPrice != null) {
+            query.addCriteria(Criteria.where("price").gte(minPrice).lte(maxPrice));
+        }
+        else if (minPrice != null) {
             query.addCriteria(Criteria.where("price")
                     .gte(minPrice));
         }
-        if (maxPrice != null) {
+        else if (maxPrice != null) {
             query.addCriteria(Criteria.where("price")
                     .lte(maxPrice));
         }
         if (colour != null && !colour.isEmpty()) {
             query.addCriteria(Criteria.where("colour").is(colour));
         }
-        if (minRating != null) {
+        if (minRating != null && maxRating != null) {
+            query.addCriteria(Criteria.where("rating").gte(minRating).lte(maxRating));
+        }
+        else if (minRating != null) {
             query.addCriteria(Criteria.where("rating")
                     .gte(minRating));
         }
-        if (maxRating != null) {
+        else if (maxRating != null) {
             query.addCriteria(Criteria.where("rating")
                     .lte(maxRating));
         }

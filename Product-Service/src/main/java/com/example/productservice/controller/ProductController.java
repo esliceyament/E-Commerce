@@ -39,8 +39,13 @@ public class ProductController {
     }
 
     @GetMapping("/{productCode}")
-    public ResponseEntity<?> getProduct(@PathVariable Long productCode) {
+    public ResponseEntity<ProductDto> getProduct(@PathVariable Long productCode) {
         return ResponseEntity.ok(productService.getProduct(productCode));
+    }
+
+    @GetMapping("/cached/{productCode}")
+    public ResponseEntity<?> getProductCached(@PathVariable Long productCode) {
+        return ResponseEntity.ok(productService.getProductCached(productCode));
     }
 
     @GetMapping("/all")
@@ -65,9 +70,9 @@ public class ProductController {
                                             @RequestParam(required = false) Double maxRating,
                                             @RequestParam(required = false) Boolean isFeatured,
                                             @RequestParam(required = false) Boolean isDiscounted,
-                                            @RequestParam(value = "page", defaultValue = "1") int page, //value = page
+                                            @RequestParam(value = "page", defaultValue = "1") int page,
                                             @RequestParam(value = "size", defaultValue = "15") int size) {
-        return ResponseEntity.ok(productService.filterProducts(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size));
+        return ResponseEntity.ok(productService.getCachedFilteredProducts(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size));
     }
 
     @PutMapping("/move")
@@ -81,7 +86,6 @@ public class ProductController {
             @PathVariable Long productCode,
             @RequestPart("images") List<MultipartFile> images) {
 
-        // Upload images and get their URLs
         List<String> imageUrls = imageUploadService.uploadImages(productCode, images);
         if (imageUrls.isEmpty()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);

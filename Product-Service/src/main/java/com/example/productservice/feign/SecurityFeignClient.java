@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @FeignClient(name = "Auth-Security")
 public interface SecurityFeignClient {
 
-    @GetMapping("/authenticate/storeName")
-    String getSellerName(@RequestHeader("Authorization") String token);
+    @GetMapping("/authenticate/getUsername")
+    String getUsername(@RequestHeader("Authorization") String token);
 }

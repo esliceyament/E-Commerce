@@ -35,8 +35,8 @@ public class AuthenticationController {
         return jwtUtil.validateToken(token);
     }
 
-    @GetMapping("/storeName")
-    public String getSellerName(@RequestHeader("Authorization") String token) {
+    @GetMapping("/getUsername")
+    public String getUsername(@RequestHeader("Authorization") String token) {
         String token1 = token.substring(7);
         return jwtUtil.extractUsername(token1);
     }

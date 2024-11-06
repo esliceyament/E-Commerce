@@ -28,7 +28,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/authenticate/login", "/authenticate/register", "/authenticate/storeName").permitAll()
+                        .requestMatchers("/authenticate/login", "/authenticate/register", "/authenticate/getUsername").permitAll()
                         .requestMatchers("/authenticate/**").hasAuthority("ADMIN")
                         .requestMatchers("/users/profile/**").authenticated()
                         .anyRequest().authenticated())

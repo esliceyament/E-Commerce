@@ -35,11 +35,12 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryFeignClient categoryFeignClient;
     private final InventoryFeignClient inventoryFeignClient;
     private final SecurityFeignClient securityFeignClient;
+    private final ProductCacheService cacheService;
 
     public ProductDto addProduct(ProductPayload payload, String authorizationHeader) {
         ResponseEntity<Category> categoryResponse = categoryFeignClient.getCategoryByName(payload.getCategoryName());
         Category category = categoryResponse.getBody();
-        String seller = securityFeignClient.getSellerName(authorizationHeader);
+        String seller = securityFeignClient.getUsername(authorizationHeader);
 
         if (category == null) {
             throw new NotFoundException("Category not found");
@@ -97,6 +98,17 @@ public class ProductServiceImpl implements ProductService {
         return mapper.toDto(product);
     }
 
+    public ProductDto getProductCached(Long productCode) {
+        ProductDto cachedDto = cacheService.getCachedProduct(productCode);
+        if (cachedDto != null) {
+            return cachedDto;
+        }
+        ProductDto productDto = getProduct(productCode);
+
+        cacheService.cacheProduct(productCode, productDto);
+        return productDto;
+    }
+
     public PageDto<List<ProductResponse>> getAllProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Product> productPage = repository.findAllByStatusTrue(pageable);
@@ -129,6 +141,20 @@ public class ProductServiceImpl implements ProductService {
                                                          Double maxPrice, String colour, Double minRating, Double maxRating,
                                                          Boolean isFeatured, Boolean isDiscounted, int page, int size) {
         return filterRepository.findProductsByFilter(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size);
+    }
+
+    public PageDto<List<ProductResponse>> getCachedFilteredProducts(String name, String category, Double minPrice,
+                                                         Double maxPrice, String colour, Double minRating, Double maxRating,
+                                                         Boolean isFeatured, Boolean isDiscounted, int page, int size) {
+        PageDto<List<ProductResponse>> productCachedResponse = cacheService.getCachedFilteredProducts(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size);
+        if (productCachedResponse != null) {
+            return productCachedResponse;
+        }
+
+        PageDto<List<ProductResponse>> productResponse = filterProducts(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size);
+
+        cacheService.cacheFilteredProducts(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size);
+        return productResponse;
     }
 
     private Long getOrderNumber() {

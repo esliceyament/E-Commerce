@@ -1,5 +1,9 @@
 spring:
   data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ""
     mongodb:
       uri: mongodb+srv://new_user:1111@cluster0.vie0f.mongodb.net/products?retryWrites=true&w=majority&appName=Cluster0
   application:
