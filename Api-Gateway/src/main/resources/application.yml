@@ -33,6 +33,13 @@ spring:
           filters:
             - name: JwtAuthenticationFilter
 
+        - id: Order-Service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/cart/**, /discount/**
+          filters:
+            - name: JwtAuthenticationFilter
+
 server:
   port: 8080
 

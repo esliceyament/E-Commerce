@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="Inventory-Service" />
+        <module name="Order-Service" />
         <module name="Category-Service" />
         <module name="Service-Discovery" />
         <module name="Auth-Security" />
@@ -26,6 +27,7 @@
       <module name="Auth-Security" options="-parameters" />
       <module name="Category-Service" options="-parameters" />
       <module name="Inventory-Service" options="-parameters" />
+      <module name="Order-Service" options="-parameters" />
       <module name="Product-Service" options="-parameters" />
       <module name="Service-Discovery" options="-parameters" />
     </option>
