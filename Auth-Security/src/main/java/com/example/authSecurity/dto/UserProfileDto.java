@@ -1,6 +1,5 @@
 package com.example.authSecurity.dto;
 
-import com.example.authSecurity.entity.Address;
 import com.example.authSecurity.validation.DoBLimit;
 import lombok.Data;
 
@@ -10,5 +9,5 @@ import java.time.LocalDate;
 public class UserProfileDto {
     @DoBLimit(message = "Minimum age of registration is 12!")
     private LocalDate dateOfBirth;
-    private Address address;
+    private AddressDto address;
 }

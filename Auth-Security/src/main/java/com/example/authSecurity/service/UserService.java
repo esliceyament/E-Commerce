@@ -7,6 +7,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface UserService {
 
-    public UserDto register(UserDto dto);
-    public String verify(UserLoginDto dto);
+    UserDto register(UserDto dto);
+    String verify(UserLoginDto dto);
 }

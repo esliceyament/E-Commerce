@@ -1,6 +1,8 @@
 package com.example.authSecurity.mapper;
 
+import com.example.authSecurity.dto.AddressDto;
 import com.example.authSecurity.dto.UserProfileDto;
+import com.example.authSecurity.entity.Address;
 import com.example.authSecurity.entity.UserProfile;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValueCheckStrategy;
@@ -11,4 +13,6 @@ import org.mapstruct.ReportingPolicy;
 public interface UserProfileMapper {
     UserProfileDto toDto(UserProfile userProfile);
     UserProfile toEntity(UserProfileDto userProfileDto);
+    AddressDto addressToDto(Address address);
+    Address addressDtoToEntity(AddressDto dto);
 }

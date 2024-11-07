@@ -15,6 +15,7 @@ public class CartItem {
 
     private Long productCode;
     private String productName;
+    private String sellerName;
 
     private int quantity;
 
@@ -23,6 +24,10 @@ public class CartItem {
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;
+
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
 
     private String selectedAttributes;
 

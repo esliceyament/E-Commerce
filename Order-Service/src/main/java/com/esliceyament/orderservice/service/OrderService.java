@@ -1,14 +1,11 @@
 package com.esliceyament.orderservice.service;
 
-import com.esliceyament.orderservice.repository.OrderRepository;
-import lombok.RequiredArgsConstructor;
+import com.esliceyament.orderservice.response.OrderResponse;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
-public class OrderService {
+public interface OrderService {
 
-    private final OrderRepository orderRepository;
-
+    OrderResponse placeOrder(String authorizationHeader, Long addressId);
 
 }

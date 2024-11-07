@@ -1,12 +1,14 @@
 package com.example.authSecurity.entity;
 
-import com.example.authSecurity.validation.DoBLimit;
-import jakarta.persistence.Embedded;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -15,6 +17,6 @@ public class UserProfile {
     private Long userId;
     private LocalDate dateOfBirth;
 
-    @Embedded
-    private Address address;
+    @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL)
+    private List<Address> address = new ArrayList<>();
 }

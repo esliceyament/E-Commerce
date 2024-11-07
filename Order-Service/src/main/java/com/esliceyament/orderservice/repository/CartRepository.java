@@ -13,4 +13,6 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
     List<Cart> findByCreatedAtBeforeAndIsActiveFalse(LocalDateTime expiryThreshold);
 
     List<Cart> findByCreatedAtBefore(LocalDateTime expiryThreshold);
+
+    Cart findByBuyerName(String name);
 }

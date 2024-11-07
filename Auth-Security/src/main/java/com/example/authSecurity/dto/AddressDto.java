@@ -1,14 +1,11 @@
-package com.esliceyament.orderservice.entity;
+package com.example.authSecurity.dto;
 
-import jakarta.persistence.Embeddable;
 import lombok.Data;
 
-@Embeddable
 @Data
-public class Address {
+public class AddressDto {
     private String street;
     private String city;
     private String postalCode;
     private String country;
 }
-

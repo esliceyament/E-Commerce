@@ -7,6 +7,7 @@ import com.esliceyament.orderservice.entity.DiscountCode;
 import com.esliceyament.orderservice.feign.InventoryFeignClient;
 import com.esliceyament.orderservice.feign.ProductFeignClient;
 import com.esliceyament.orderservice.feign.SecurityFeignClient;
+import com.esliceyament.orderservice.mapper.CartItemMapper;
 import com.esliceyament.orderservice.payload.CartItemPayload;
 import com.esliceyament.orderservice.repository.CartRepository;
 import com.esliceyament.orderservice.repository.DiscountCodeRepository;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +33,7 @@ public class CartServiceImpl implements CartService {
     private final ProductFeignClient productFeignClient;
     private final InventoryFeignClient inventoryFeignClient;
     private final DiscountCodeRepository discountCodeRepository;
+    private final CartItemMapper mapper;
 
     public void addItemToCart(CartItemPayload payload, String authorizationHeader) {
         ResponseEntity<Product> productResponse = productFeignClient.getProduct(payload.getProductCode());
@@ -50,9 +53,10 @@ public class CartServiceImpl implements CartService {
         } else {
             CartItem cartItem = new CartItem();
             cartItem.setProductCode(payload.getProductCode());
+            cartItem.setProductName(product.getName());
+            cartItem.setSellerName(securityFeignClient.getUsername(authorizationHeader));
             cartItem.setQuantity(1);
             cartItem.setSelectedAttributes(payload.getSelectedAttributes());
-            cartItem.setProductName(product.getName());
             cartItem.setPricePerUnit(product.getPrice());
             cartItem.setAddedAt(LocalDateTime.now());
             cartItem.setIsRemoved(false);
@@ -71,7 +75,8 @@ public class CartServiceImpl implements CartService {
     public CartResponse getCardResponse(String authorizationHeader) {
         Cart cart = findCart(authorizationHeader);
         CartResponse response = new CartResponse();
-        response.setCartItems(cart.getCartItems());
+        response.setCartItems(cart.getCartItems().stream()
+                .map(mapper::toResponse).collect(Collectors.toSet()));
         response.setTotalPrice(cart.getTotalPrice());
         return response;
     }
