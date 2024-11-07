@@ -12,7 +12,6 @@ public class StockUpdatePayload {
         this.totalStock = totalStock;
     }
 
-    // Getters and Setters
     public Long getProductCode() {
         return productCode;
     }

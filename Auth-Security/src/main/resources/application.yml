@@ -7,10 +7,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true  # Optional: Show SQL queries in the console
-    properties:
-      hibernate:
-        format_sql: true  # Optional: Format SQL queries
+#    show-sql: true  # Optional: Show SQL queries in the console
+#    properties:
+#      hibernate:
+#        format_sql: true  # Optional: Format SQL queries
   application:
     name: Auth-Security
 

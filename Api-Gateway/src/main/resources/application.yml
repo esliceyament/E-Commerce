@@ -10,7 +10,7 @@ spring:
         - id: Auth-Security  # Adding Auth-Service route
           uri: lb://AUTH-SECURITY  # Load balanced URI for the Auth service
           predicates:
-            - Path=/authenticate/**
+            - Path=/authenticate/**, /users/profile/**
 
         - id: Product-Service
           uri: lb://PRODUCT-SERVICE
@@ -36,7 +36,7 @@ spring:
         - id: Order-Service
           uri: lb://ORDER-SERVICE
           predicates:
-            - Path=/cart/**, /discount/**
+            - Path=/cart/**, /discount/**, /order/**
           filters:
             - name: JwtAuthenticationFilter
 
