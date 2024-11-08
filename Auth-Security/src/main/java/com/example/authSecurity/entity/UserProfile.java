@@ -1,9 +1,6 @@
 package com.example.authSecurity.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -18,6 +15,7 @@ public class UserProfile {
     private LocalDate dateOfBirth;
 
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL)
+    @Transient
     private List<Address> address = new ArrayList<>();
 
     @Override

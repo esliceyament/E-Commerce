@@ -25,11 +25,11 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="authDB@localhost" uuid="d0b621d8-a036-4406-a8e1-dd20d11b9526">
+    <data-source source="LOCAL" name="authdb@localhost" uuid="7dee75be-a9d0-4dd3-8359-7a4ff028b1ff">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mysql://localhost:3306/authDB</jdbc-url>
+      <jdbc-url>jdbc:mysql://localhost:3306/authdb</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
