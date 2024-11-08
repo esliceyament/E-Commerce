@@ -80,7 +80,32 @@ public class OrderServiceImpl implements OrderService {
             eventProducer.sendOrderStockUpdate(orderedStockUpdate);
         }
 
+        archiveHistory(order);
+
         return orderResponse;
 
+    @Override
+    public OrderHistoryResponse getOrderHistory(Long id, String authorizationHeader) {
+        String username = securityFeignClient.getUsername(authorizationHeader);
+        OrderHistory history = historyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("No history"));
+        if (!username.equals(history.getUsername())) {
+            throw new BadRequestException();
+        }
+        OrderHistoryResponse response = new OrderHistoryResponse();
+        response.setOrderId(history.getOrderId());
+        response.setUsername(history.getUsername());
+        response.setOrderDate(history.getOrderDate());
+        response.setStatus(history.getStatus());
+        response.setTotalAmount(history.getTotalAmount());
+        return response;
+    }
+
+    @Override
+    public List<OrderHistoryResponse> getAllOrderHistories(String authorizationHeader) {
+        String username = securityFeignClient.getUsername(authorizationHeader);
+        return historyRepository.findAllByUsername(username).stream()
+                .map(historyMapper::toResponse).collect(Collectors.toList());
+    }
     }
 }
