@@ -17,6 +17,7 @@ public class ReturnRequest {
     private Long id;
 
     private Long orderId;
+    private String buyerName;
 
     private String reason;
 

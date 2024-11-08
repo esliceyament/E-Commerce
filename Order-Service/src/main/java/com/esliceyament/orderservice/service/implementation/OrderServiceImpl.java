@@ -84,6 +84,61 @@ public class OrderServiceImpl implements OrderService {
 
         return orderResponse;
 
+    }
+
+    @Override
+    public OrderResponse updateOrder(Long id, OrderStatus status) {
+        CartItem item = itemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Not found!"));
+
+        Order order = orderRepository.findById(item.getOrder().getId())
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+        if (order.getStatus() == OrderStatus.CANCELED) {
+            throw new RuntimeException("The order was canceled");
+        }
+        item.setStatus(status);
+        itemRepository.save(item);
+
+        if (order.getCartItemSet().stream().allMatch(x -> x.getStatus().equals(status))) {
+            order.setStatus(status);
+            order.setUpdatedAt(LocalDateTime.now());
+            orderRepository.save(order);
+        }
+
+        OrderResponse response = new OrderResponse();
+        response.setBuyerName(order.getBuyerName());
+        response.setOrderedAt(order.getOrderedAt());
+        response.setUpdatedAt(order.getUpdatedAt());
+        response.setStatus(status);
+        response.setTotalAmount(order.getTotalAmount());
+        response.setCartItemSet(order.getCartItemSet().stream().map(mapper::toResponse).collect(Collectors.toSet()));
+        response.setPaymentId(order.getPaymentId());
+        response.setShippingAddress(order.getShippingAddress());
+
+        return response;
+    }
+
+    @Override
+    public OrderResponse getOrder(Long id, String authorizationHeader) {
+        String username = securityFeignClient.getUsername(authorizationHeader);
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        if (!username.equals(order.getBuyerName())) {
+            throw new BadRequestException();
+        }
+        OrderResponse response = new OrderResponse();
+        response.setBuyerName(order.getBuyerName());
+        response.setOrderedAt(order.getOrderedAt());
+        response.setUpdatedAt(order.getUpdatedAt());
+        response.setStatus(order.getStatus());
+        response.setTotalAmount(order.getTotalAmount());
+        response.setCartItemSet(order.getCartItemSet().stream()
+                .map(mapper::toResponse).collect(Collectors.toSet()));
+        response.setPaymentId(order.getPaymentId());
+        response.setShippingAddress(order.getShippingAddress());
+        return response;
+    }
+
     @Override
     public OrderHistoryResponse getOrderHistory(Long id, String authorizationHeader) {
         String username = securityFeignClient.getUsername(authorizationHeader);
@@ -107,5 +162,59 @@ public class OrderServiceImpl implements OrderService {
         return historyRepository.findAllByUsername(username).stream()
                 .map(historyMapper::toResponse).collect(Collectors.toList());
     }
+
+    @Override
+    public Address updateShippingAddress(Address address, Long id, String authorizationHeader) {
+        String username = securityFeignClient.getUsername(authorizationHeader);
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Not found"));
+
+        if (!username.equals(order.getBuyerName())) {
+            throw new BadRequestException();
+        }
+
+        if (!order.getStatus().equals(OrderStatus.PENDING)) {
+            throw new RuntimeException("You can't change address");
+        }
+
+        order.setShippingAddress(address);
+
+        orderRepository.save(order);
+
+        ShippingAddressUpdate shippingAddressUpdate = new ShippingAddressUpdate();
+        shippingAddressUpdate.setStreet(address.getStreet());
+        shippingAddressUpdate.setCity(address.getCity());
+        shippingAddressUpdate.setPostalCode(address.getPostalCode());
+        shippingAddressUpdate.setCountry(address.getCountry());
+        shippingAddressUpdate.setUsername(username);
+        producer.sendShippingAddressUpdate(shippingAddressUpdate);
+
+        return address;
+    }
+
+    @Override
+    public void cancelOrder(Long id, String authorizationHeader) {
+        String username = securityFeignClient.getUsername(authorizationHeader);
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Not found"));
+        if (!username.equals(order.getBuyerName())) {
+            throw new BadRequestException();
+        }
+        if (!order.getStatus().equals(OrderStatus.PENDING) && !order.getStatus().equals(OrderStatus.CONFIRMED)) {
+            throw new RuntimeException("You can't cancel order");
+        }
+        ///vernut oplatu
+        order.setStatus(OrderStatus.CANCELED);
+        orderRepository.save(order);
+    }
+
+    private void archiveHistory(Order order) {
+        OrderHistory history = new OrderHistory();
+        history.setOrderId(order.getId());
+        history.setUsername(order.getBuyerName());
+        history.setOrderDate(order.getOrderedAt());
+        history.setStatus(order.getStatus());
+        history.setTotalAmount(order.getTotalAmount());
+        historyRepository.save(history);
     }
 }

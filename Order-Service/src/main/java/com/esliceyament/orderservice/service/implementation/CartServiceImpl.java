@@ -4,6 +4,7 @@ import com.esliceyament.orderservice.dto.Product;
 import com.esliceyament.orderservice.entity.Cart;
 import com.esliceyament.orderservice.entity.CartItem;
 import com.esliceyament.orderservice.entity.DiscountCode;
+import com.esliceyament.orderservice.enums.OrderStatus;
 import com.esliceyament.orderservice.feign.InventoryFeignClient;
 import com.esliceyament.orderservice.feign.ProductFeignClient;
 import com.esliceyament.orderservice.feign.SecurityFeignClient;
@@ -60,6 +61,7 @@ public class CartServiceImpl implements CartService {
             cartItem.setPricePerUnit(product.getPrice());
             cartItem.setAddedAt(LocalDateTime.now());
             cartItem.setIsRemoved(false);
+            cartItem.setStatus(OrderStatus.PENDING);
             cartItem.setCart(cart);
 
             cart.getCartItems().add(cartItem);

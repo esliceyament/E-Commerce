@@ -16,4 +16,13 @@ public class OrderController {
     public ResponseEntity<?> placeOrder(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, @RequestParam(required = false) Long addressId) {
         return ResponseEntity.ok(orderService.placeOrder(authorizationHeader, addressId));
     }
+    @GetMapping("/history/{id}")
+    public ResponseEntity<?> getOrderHistory(@PathVariable Long id, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return ResponseEntity.ok(orderService.getOrderHistory(id, authorizationHeader));
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<?> getAllOrderHistories(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return ResponseEntity.ok(orderService.getAllOrderHistories(authorizationHeader));
+    }
 }

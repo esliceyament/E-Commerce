@@ -1,5 +1,6 @@
 package com.esliceyament.orderservice.entity;
 
+import com.esliceyament.orderservice.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -21,6 +22,9 @@ public class CartItem {
 
     private Double pricePerUnit;
 
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;
@@ -34,6 +38,8 @@ public class CartItem {
     private LocalDateTime addedAt;
 
     private Boolean isRemoved;
+
+
 
     @Override
     public int hashCode() {
