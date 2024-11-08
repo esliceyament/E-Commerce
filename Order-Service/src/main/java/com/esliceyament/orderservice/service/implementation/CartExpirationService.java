@@ -37,6 +37,8 @@ public class CartExpirationService {
         cartList.forEach(cart -> {
             cart.getCartItems().clear();
             cart.setTotalPrice(0D);
+            cart.setDiscountPrice(0D);
+            cart.setDiscountCode(null);
         });
         cartRepository.saveAll(cartList);
     }
