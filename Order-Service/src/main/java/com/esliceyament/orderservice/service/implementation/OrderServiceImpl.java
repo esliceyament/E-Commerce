@@ -28,6 +28,10 @@ public class OrderServiceImpl implements OrderService {
     private final CartRepository cartRepository;
     private final OrderEventProducer eventProducer;
     private final CartItemMapper mapper;
+    private final OrderHistoryMapper historyMapper;
+    private final OrderHistoryRepository historyRepository;
+    private final ItemRepository itemRepository;
+    private final OrderEventProducer producer;
 
 
     @Override
@@ -59,9 +63,17 @@ public class OrderServiceImpl implements OrderService {
         } else {
             order.setTotalAmount(cart.getTotalPrice());
         }
+        cart.getCartItems().forEach((item -> item.setOrder(order)));
         order.getCartItemSet().addAll(cart.getCartItems());
         order.setShippingAddress(selectedAddress);
         orderRepository.save(order);
+
+        cart.getCartItems().clear();
+        cart.setTotalPrice(0D);
+        cart.setDiscountPrice(0D);
+        cart.setDiscountCode(null);
+        cart.setCreatedAt(LocalDateTime.now());
+        cartRepository.save(cart);
 
         OrderResponse orderResponse = new OrderResponse();
         orderResponse.setBuyerName(order.getBuyerName());
