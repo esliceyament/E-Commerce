@@ -1,7 +1,12 @@
 package com.esliceyament.orderservice.service;
 
+import com.esliceyament.orderservice.entity.Address;
+import com.esliceyament.orderservice.enums.OrderStatus;
+import com.esliceyament.orderservice.response.OrderHistoryResponse;
 import com.esliceyament.orderservice.response.OrderResponse;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public interface OrderService {

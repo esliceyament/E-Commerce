@@ -20,4 +20,16 @@ public class Address {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserProfile userProfile;
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "id=" + id +
+                ", street='" + street + '\'' +
+                ", city='" + city + '\'' +
+                ", postalCode='" + postalCode + '\'' +
+                ", country='" + country + '\'' +
+                ", lastUsedAt=" + lastUsedAt +
+                '}';
+    }
 }

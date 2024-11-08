@@ -19,4 +19,12 @@ public class UserProfile {
 
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL)
     private List<Address> address = new ArrayList<>();
+
+    @Override
+    public String toString() {
+        return "UserProfile{" +
+                "userId=" + userId +
+                ", dateOfBirth=" + dateOfBirth +
+                '}';
+    }
 }

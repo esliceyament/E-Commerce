@@ -1,5 +1,6 @@
 package com.example.authSecurity.service.implementation;
 
+import com.esliceyament.shared.payload.ShippingAddressUpdate;
 import com.example.authSecurity.dto.AddressDto;
 import com.example.authSecurity.dto.UserProfileDto;
 import com.example.authSecurity.entity.Address;
@@ -16,6 +17,7 @@ import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.Date;
@@ -54,7 +56,27 @@ public class UserProfileServiceImpl implements UserProfileService {
         userProfile.getAddress().add(address);
         userProfile.getAddress().sort(Comparator.comparing(Address::getLastUsedAt));
         userProfileRepository.save(userProfile);
+        addressRepository.save(address);
         return userProfileMapper.addressToDto(address);
+    }
+
+    @Transactional
+    public void addShippingAddress(ShippingAddressUpdate shippingAddressUpdate) {
+        User user = userRepository.findByUsername(shippingAddressUpdate.getUsername())
+                .orElseThrow(() -> new NotFoundException("User " + shippingAddressUpdate.getUsername() + " not found!"));
+        UserProfile userProfile = userProfileRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new NotFoundException("User not found!"));
+        Address address = new Address();
+        address.setStreet(shippingAddressUpdate.getStreet());
+        address.setCity(shippingAddressUpdate.getCity());
+        address.setPostalCode(shippingAddressUpdate.getPostalCode());
+        address.setCountry(shippingAddressUpdate.getCountry());
+        address.setLastUsedAt(new Date());
+        address.setUserProfile(userProfile);
+        userProfile.getAddress().add(address);
+        userProfile.getAddress().sort(Comparator.comparing(Address::getLastUsedAt));
+        System.out.println(address);
+        userProfileRepository.save(userProfile);
     }
 
     public UserProfileDto getUserProfile() {

@@ -7,12 +7,18 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-#    show-sql: true  # Optional: Show SQL queries in the console
-#    properties:
-#      hibernate:
-#        format_sql: true  # Optional: Format SQL queries
   application:
     name: Auth-Security
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: auth-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        value.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: com.esliceyament.shared.payload
 
 eureka:
   client:

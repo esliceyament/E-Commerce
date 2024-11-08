@@ -36,7 +36,7 @@ spring:
         - id: Order-Service
           uri: lb://ORDER-SERVICE
           predicates:
-            - Path=/cart/**, /discount/**, /order/**
+            - Path=/cart/**, /discount/**, /order/**, /return/**
           filters:
             - name: JwtAuthenticationFilter
 

@@ -1,22 +1,26 @@
 package com.esliceyament.orderservice.service.implementation;
 
-import com.esliceyament.orderservice.entity.Address;
-import com.esliceyament.orderservice.entity.Cart;
-import com.esliceyament.orderservice.entity.CartItem;
-import com.esliceyament.orderservice.entity.Order;
+import com.esliceyament.orderservice.entity.*;
 import com.esliceyament.orderservice.enums.OrderStatus;
 import com.esliceyament.orderservice.feign.SecurityFeignClient;
 import com.esliceyament.orderservice.kafka.OrderEventProducer;
 import com.esliceyament.orderservice.mapper.CartItemMapper;
+import com.esliceyament.orderservice.mapper.OrderHistoryMapper;
 import com.esliceyament.orderservice.repository.CartRepository;
+import com.esliceyament.orderservice.repository.ItemRepository;
+import com.esliceyament.orderservice.repository.OrderHistoryRepository;
 import com.esliceyament.orderservice.repository.OrderRepository;
+import com.esliceyament.orderservice.response.OrderHistoryResponse;
 import com.esliceyament.orderservice.response.OrderResponse;
 import com.esliceyament.orderservice.service.OrderService;
 import com.esliceyament.shared.payload.OrderedStockUpdate;
+import com.esliceyament.shared.payload.ShippingAddressUpdate;
+import jakarta.ws.rs.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service

@@ -9,5 +9,4 @@ import java.time.LocalDate;
 public class UserProfileDto {
     @DoBLimit(message = "Minimum age of registration is 12!")
     private LocalDate dateOfBirth;
-    private AddressDto address;
 }
