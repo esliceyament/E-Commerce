@@ -15,6 +15,7 @@ import com.example.productservice.repository.ProductFilterRepository;
 import com.example.productservice.repository.ProductRepository;
 import com.example.productservice.response.ProductResponse;
 import com.example.productservice.service.ProductService;
+import com.example.productservice.service.cache.ProductCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -104,7 +105,6 @@ public class ProductServiceImpl implements ProductService {
             return cachedDto;
         }
         ProductDto productDto = getProduct(productCode);
-
         cacheService.cacheProduct(productCode, productDto);
         return productDto;
     }

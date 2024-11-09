@@ -1,4 +1,4 @@
-package com.example.productservice.service.implementation;
+package com.example.productservice.service.cache;
 
 import com.example.productservice.dto.PageDto;
 import com.example.productservice.dto.ProductDto;
@@ -22,7 +22,7 @@ public class ProductCacheService {
     private final ObjectMapper mapper;
     private final ProductFilterRepository filterRepository;
 
-    private static final int CACHE_TTL_SECONDS = 30;
+    private static final int CACHE_TTL_SECONDS = 300;
 
     private static final String PRODUCT_CACHE_KEY_PREFIX = "product:";
 

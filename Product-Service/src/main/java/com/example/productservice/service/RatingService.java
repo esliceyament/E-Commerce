@@ -7,9 +7,9 @@ import java.util.List;
 
 @Service
 public interface RatingService {
-    RatingDto addRating(RatingDto dto);
+    RatingDto addRating(RatingDto dto, String authorizationHeader);
     RatingDto updateRating(String id, RatingDto dto);
     void deleteRating(String id);
-    RatingDto getRating(String id);
-    List<RatingDto> getAllRatings();
+    RatingDto getCachedRating(String id);
+    List<RatingDto> getAllCachedRatings();
 }

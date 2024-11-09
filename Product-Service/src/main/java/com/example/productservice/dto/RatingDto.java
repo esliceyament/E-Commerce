@@ -7,8 +7,9 @@ import lombok.Data;
 
 @Data
 public class RatingDto {
+    private String username;
     @NotBlank
-    private String productId;
+    private Long productId;
     @Min(value = 1, message = "The rating should be at least 1!")
     @Max(value = 5, message = "The maximum rating is 5!")
     private Double rating;

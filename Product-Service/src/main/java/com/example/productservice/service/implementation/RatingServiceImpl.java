@@ -4,10 +4,12 @@ import com.example.productservice.dto.RatingDto;
 import com.example.productservice.entity.Product;
 import com.example.productservice.entity.Rating;
 import com.example.productservice.exception.NotFoundException;
+import com.example.productservice.feign.SecurityFeignClient;
 import com.example.productservice.mapper.RatingMapper;
 import com.example.productservice.repository.ProductRepository;
 import com.example.productservice.repository.RatingRepository;
 import com.example.productservice.service.RatingService;
+import com.example.productservice.service.cache.RatingCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,12 +23,15 @@ public class RatingServiceImpl implements RatingService {
     private final RatingRepository repository;
     private final ProductRepository productRepository;
     private final RatingMapper mapper;
+    private final RatingCacheService cacheService;
+    private final SecurityFeignClient securityFeignClient;
 
-    public RatingDto addRating(RatingDto dto) {
+    @Override
+    public RatingDto addRating(RatingDto dto, String authorizationHeader) {
 
         Rating rating = mapper.toEntity(dto);
         rating.setCreateTime(LocalDate.now());
-        rating.setUserId(1L);
+        rating.setUsername(securityFeignClient.getUsername(authorizationHeader));
         rating.setStatus(true);
         repository.save(rating);
 
@@ -36,7 +41,7 @@ public class RatingServiceImpl implements RatingService {
             product.setRatingIds(new ArrayList<>());
         }
         product.getRatingIds().add(rating.getId());
-        product.setRating(avgRating(product.getId(), rating.getRating()));
+        product.setRating(avgRating(product.getProductCode(), rating.getRating()));
         product.setRatingCount(ratingCount(product.getId()));
         productRepository.save(product);
 
@@ -60,19 +65,17 @@ public class RatingServiceImpl implements RatingService {
         repository.save(rating);
     }
 
-    @Override
     public RatingDto getRating(String id) {
         Rating rating = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Rating not found!"));
         return mapper.toDto(rating);
     }
 
-    @Override
     public List<RatingDto> getAllRatings() {
         return repository.findAllByStatusTrueOrderByCreateTime();
     }
 
-    private Double avgRating(String id, Double newRating) {
+    private Double avgRating(Long id, Double newRating) {
         Product product = getProduct(id);
         Double rating = product.getRating();
         if (product.getRatingCount() == 0) {
@@ -84,8 +87,30 @@ public class RatingServiceImpl implements RatingService {
         return rating;
     }
 
-    private Product getProduct(String id) {
-        return productRepository.findById(id)
+    @Override
+    public RatingDto getCachedRating(String id) {
+        RatingDto cachedRating = cacheService.getCachedRating(id);
+        if (cachedRating != null) {
+            return cachedRating;
+        }
+        RatingDto ratingDto = getRating(id);
+        cacheService.cacheRating(id, ratingDto);
+        return ratingDto;
+    }
+
+   @Override
+    public List<RatingDto> getAllCachedRatings() {
+        List<RatingDto> cachedRatings = cacheService.getAllCachedRatings();
+        if (cachedRatings != null) {
+            return cachedRatings;
+        }
+        List<RatingDto> ratingDtoList = getAllRatings();
+        cacheService.cacheAllRatings(ratingDtoList);
+        return ratingDtoList;
+    }
+
+    private Product getProduct(Long id) {
+        return productRepository.findByProductCode(id)
                 .orElseThrow(() -> new NotFoundException("Product not found!"));
     }
 

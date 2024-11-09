@@ -11,8 +11,8 @@ import java.time.LocalDate;
 public class Rating {
     @Id
     private String id;
-    private String productId;
-    private Long userId;
+    private Long productId;
+    private String username;
     private Double rating = 0D;
     private String comment;
     private LocalDate createTime;

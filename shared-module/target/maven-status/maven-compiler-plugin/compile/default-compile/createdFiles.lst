@@ -1,1 +1,3 @@
+com\esliceyament\shared\payload\OrderedStockUpdate.class
+com\esliceyament\shared\payload\ShippingAddressUpdate.class
 com\esliceyament\shared\payload\StockUpdatePayload.class

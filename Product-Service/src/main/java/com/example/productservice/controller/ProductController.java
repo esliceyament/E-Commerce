@@ -39,11 +39,6 @@ public class ProductController {
     }
 
     @GetMapping("/{productCode}")
-    public ResponseEntity<ProductDto> getProduct(@PathVariable Long productCode) {
-        return ResponseEntity.ok(productService.getProduct(productCode));
-    }
-
-    @GetMapping("/cached/{productCode}")
     public ResponseEntity<?> getProductCached(@PathVariable Long productCode) {
         return ResponseEntity.ok(productService.getProductCached(productCode));
     }
