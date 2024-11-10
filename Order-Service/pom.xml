@@ -87,7 +87,14 @@
             <artifactId>mapstruct-processor</artifactId>
             <version>1.5.5.Final</version>
         </dependency>
-        
+
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>5.1.5</version>
+        </dependency>
+
+
     </dependencies>
 
     <dependencyManagement>

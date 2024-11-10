@@ -20,6 +20,8 @@ public class ProductDto {
 
     private String colour;
     private Integer totalStock;
+    private boolean outOfStock;
+
     private List<String> ratingIds;
     private Double rating;
     private Integer ratingCount;

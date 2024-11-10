@@ -13,6 +13,7 @@ import com.esliceyament.orderservice.repository.OrderRepository;
 import com.esliceyament.orderservice.response.OrderHistoryResponse;
 import com.esliceyament.orderservice.response.OrderResponse;
 import com.esliceyament.orderservice.service.OrderService;
+import com.esliceyament.orderservice.service.cache.OrderCacheService;
 import com.esliceyament.shared.payload.OrderedStockUpdate;
 import com.esliceyament.shared.payload.ShippingAddressUpdate;
 import jakarta.ws.rs.BadRequestException;
@@ -36,6 +37,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderHistoryRepository historyRepository;
     private final ItemRepository itemRepository;
     private final OrderEventProducer producer;
+    private final OrderCacheService cacheService;
 
 
     @Override
@@ -152,6 +154,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponse getOrder(Long id, String authorizationHeader) {
         String username = securityFeignClient.getUsername(authorizationHeader);
+        OrderResponse cacheResponse = cacheService.getCacheOrder(id, username);
+        if (cacheResponse != null) {
+            return cacheResponse;
+        }
+
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
         if (!username.equals(order.getBuyerName())) {
@@ -167,12 +174,18 @@ public class OrderServiceImpl implements OrderService {
                 .map(mapper::toResponse).collect(Collectors.toSet()));
         response.setPaymentId(order.getPaymentId());
         response.setShippingAddress(order.getShippingAddress());
+        cacheService.cacheOrder(id, username, response);
         return response;
     }
 
     @Override
     public OrderHistoryResponse getOrderHistory(Long id, String authorizationHeader) {
         String username = securityFeignClient.getUsername(authorizationHeader);
+        OrderHistoryResponse cacheResponse = cacheService.getCacheOrderHistory(id, username);
+        if (cacheResponse != null) {
+            return cacheResponse;
+        }
+
         OrderHistory history = historyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("No history"));
         if (!username.equals(history.getUsername())) {
@@ -184,14 +197,21 @@ public class OrderServiceImpl implements OrderService {
         response.setOrderDate(history.getOrderDate());
         response.setStatus(history.getStatus());
         response.setTotalAmount(history.getTotalAmount());
+        cacheService.cacheOrderHistory(id, username, response);
         return response;
     }
 
     @Override
     public List<OrderHistoryResponse> getAllOrderHistories(String authorizationHeader) {
         String username = securityFeignClient.getUsername(authorizationHeader);
-        return historyRepository.findAllByUsername(username).stream()
-                .map(historyMapper::toResponse).collect(Collectors.toList());
+        List<OrderHistoryResponse> cacheOrderHistoryResponseList = cacheService.getAllCacheOrderHistory(username);
+        if (cacheOrderHistoryResponseList != null) {
+            return cacheOrderHistoryResponseList;
+        }
+        List<OrderHistoryResponse> orderHistoryResponseList = historyRepository.findAllByUsername(username).stream()
+                .map(historyMapper::toResponse).toList();
+        cacheService.cacheAllOrderHistory(username, orderHistoryResponseList);
+        return orderHistoryResponseList;
     }
 
     @Override

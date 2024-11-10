@@ -28,6 +28,7 @@ public class Product {
 
     private String colour;
     private int totalStock;
+    private boolean outOfStock;
 
     private List<String> ratingIds;
     private Double rating = 0D;

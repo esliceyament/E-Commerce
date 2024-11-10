@@ -10,6 +10,11 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: update
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ""
   kafka:
     bootstrap-servers: localhost:9092
     producer:

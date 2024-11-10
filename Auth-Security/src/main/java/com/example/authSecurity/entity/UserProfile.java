@@ -15,7 +15,6 @@ public class UserProfile {
     private LocalDate dateOfBirth;
 
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL)
-    @Transient
     private List<Address> address = new ArrayList<>();
 
     @Override

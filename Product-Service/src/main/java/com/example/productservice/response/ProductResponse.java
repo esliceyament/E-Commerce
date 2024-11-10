@@ -20,6 +20,8 @@ public class ProductResponse {
     private String sellerName;
 
     private String colour;
+    private boolean outOfStock;
+
     private Double rating;
     private Integer ratingCount;
 

@@ -4,17 +4,20 @@ import com.esliceyament.orderservice.dto.Product;
 import com.esliceyament.orderservice.entity.Cart;
 import com.esliceyament.orderservice.entity.CartItem;
 import com.esliceyament.orderservice.entity.DiscountCode;
+import com.esliceyament.orderservice.enums.DiscountType;
 import com.esliceyament.orderservice.enums.OrderStatus;
 import com.esliceyament.orderservice.feign.InventoryFeignClient;
 import com.esliceyament.orderservice.feign.ProductFeignClient;
 import com.esliceyament.orderservice.feign.SecurityFeignClient;
 import com.esliceyament.orderservice.mapper.CartItemMapper;
+import com.esliceyament.orderservice.mapper.CartMapper;
 import com.esliceyament.orderservice.payload.CartItemPayload;
 import com.esliceyament.orderservice.repository.CartRepository;
 import com.esliceyament.orderservice.repository.DiscountCodeRepository;
 import com.esliceyament.orderservice.repository.ItemRepository;
 import com.esliceyament.orderservice.response.CartResponse;
 import com.esliceyament.orderservice.service.CartService;
+import com.esliceyament.orderservice.service.cache.CartCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -35,6 +38,8 @@ public class CartServiceImpl implements CartService {
     private final InventoryFeignClient inventoryFeignClient;
     private final DiscountCodeRepository discountCodeRepository;
     private final CartItemMapper mapper;
+    private final CartCacheService cacheService;
+    private final CartMapper cartMapper;
 
     public void addItemToCart(CartItemPayload payload, String authorizationHeader) {
         ResponseEntity<Product> productResponse = productFeignClient.getProduct(payload.getProductCode());
@@ -75,14 +80,22 @@ public class CartServiceImpl implements CartService {
         }
         cartRepository.save(cart);
 
+        CartResponse response = cartMapper.toResponse(cart);
+        cacheService.cacheCart(cart.getBuyerName(), response);
     }
 
     public CartResponse getCardResponse(String authorizationHeader) {
+        String username = securityFeignClient.getUsername(authorizationHeader);
+        CartResponse cacheResponse = cacheService.getCacheCart(username);
+        if (cacheResponse != null) {
+            return cacheResponse;
+        }
         Cart cart = findCart(authorizationHeader);
         CartResponse response = new CartResponse();
         response.setCartItems(cart.getCartItems().stream()
                 .map(mapper::toResponse).collect(Collectors.toSet()));
         response.setTotalPrice(cart.getTotalPrice());
+        cacheService.cacheCart(username, response);
         return response;
     }
 
@@ -102,10 +115,12 @@ public class CartServiceImpl implements CartService {
             cart.setDiscountPrice(calculateDiscountPrice(cart.getDiscountCode(), cart));
         }
         cartRepository.save(cart);
+
+        CartResponse response = cartMapper.toResponse(cart);
+        cacheService.cacheCart(cart.getBuyerName(), response);
     }
 
     public int updateItemQuantity(Long productCode, int quantity, String authorizationHeader) {
-
         Cart cart = findCart(authorizationHeader);
         CartItem cartItem = cart.getCartItems().stream()
                         .filter(item -> item.getProductCode().equals(productCode))
@@ -113,7 +128,6 @@ public class CartServiceImpl implements CartService {
                                         .orElseThrow(() -> new RuntimeException("Product with code " + productCode + " not found in cart."));
 
         int stock = inventoryFeignClient.getStock(productCode, cartItem.getSelectedAttributes());
-        System.out.println(stock);
         if (quantity > stock || cartItem.getQuantity() <= 0) {
             throw new RuntimeException("Choose appropriate quantity");
         }
@@ -126,6 +140,9 @@ public class CartServiceImpl implements CartService {
             cart.setDiscountPrice(calculateDiscountPrice(cart.getDiscountCode(), cart));
         }
         cartRepository.save(cart);
+
+        CartResponse response = cartMapper.toResponse(cart);
+        cacheService.cacheCart(cart.getBuyerName(), response);
         return quantity;
     }
 
@@ -142,6 +159,9 @@ public class CartServiceImpl implements CartService {
         }
 
         cartRepository.save(cart);
+
+        CartResponse response = cartMapper.toResponse(cart);
+        cacheService.cacheCart(cart.getBuyerName(), response);
     }
 
     public Double useDiscountCode(String code, String authorizationCode) {
@@ -166,17 +186,15 @@ public class CartServiceImpl implements CartService {
             throw new RuntimeException("This code was used");
         }
 
-        double discountPrice;
-        if (discount.getDiscountType().toString().equals("PERCENTAGE")) {
-            discountPrice = cart.getTotalPrice() * (100 - discount.getDiscount()) / 100;
-        } else {
-            discountPrice = cart.getTotalPrice() - discount.getDiscount();
-        }
+        double discountPrice = calculateDiscountPrice(code, cart);
 
         cart.setDiscountPrice(Math.max(discountPrice, 0));
         cart.setDiscountCode(code);
 
         cartRepository.save(cart);
+
+        CartResponse response = cartMapper.toResponse(cart);
+        cacheService.cacheCart(cart.getBuyerName(), response);
         return cart.getDiscountPrice();
     }
 
@@ -219,6 +237,5 @@ public class CartServiceImpl implements CartService {
         return cartRepository.findActiveCartByBuyerName(username)
                 .orElseGet(() -> createNewCart(username));
     }
-
 
 }

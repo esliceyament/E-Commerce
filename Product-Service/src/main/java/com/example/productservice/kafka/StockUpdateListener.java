@@ -19,6 +19,9 @@ public class StockUpdateListener {
         Product product = repository.findByProductCode(payload.getProductCode())
                 .orElseThrow(() -> new NotFoundException("Product with code " + payload.getProductCode() + " not found!"));
         product.setTotalStock(payload.getTotalStock());
+        if (payload.getTotalStock() == 0) {
+            product.setOutOfStock(true);
+        }
         repository.save(product);
     }
 }

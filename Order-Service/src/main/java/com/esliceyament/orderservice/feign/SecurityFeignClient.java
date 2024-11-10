@@ -14,12 +14,12 @@ public interface SecurityFeignClient {
     @GetMapping("/authenticate/getUsername")
     String getUsername(@RequestHeader("Authorization") String token);
 
-    @GetMapping("/users/profile/get-address")
-    Address getAddress(@RequestHeader(HttpHeaders.AUTHORIZATION) String token);
+    @GetMapping("/users/profile/get-address")   /////
+    Address getAddress(@RequestHeader("Authorization") String token);
 
-    @GetMapping("/users/profile/get-address-by-id")
+    @GetMapping("/users/profile/get-address-by-id")  /////
     Address getAddressById(@RequestHeader(HttpHeaders.AUTHORIZATION) String token, Long id);
 
-    @PutMapping("/users/profile/update-address")
+    @PutMapping("/users/profile/update-address")  /////
     void updateDefaultAddress(@RequestParam Long addressId);
 }
