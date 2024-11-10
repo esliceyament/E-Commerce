@@ -104,19 +104,34 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse updateOrder(Long id, OrderStatus status) {
-        CartItem item = itemRepository.findById(id)
+        CartItem cartItem = itemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Not found!"));
 
-        Order order = orderRepository.findById(item.getOrder().getId())
+        Order order = orderRepository.findById(cartItem.getOrder().getId())
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
         if (order.getStatus() == OrderStatus.CANCELED) {
             throw new RuntimeException("The order was canceled");
         }
-        item.setStatus(status);
-        itemRepository.save(item);
+        cartItem.setStatus(status);
+        if (status == OrderStatus.CONFIRMED) {
+            cartItem.setStageStatus(1);
+        } else if (status == OrderStatus.SHIPPED) {
+            cartItem.setStageStatus(2);
+        } else {
+            cartItem.setStageStatus(3);
+        }
+        itemRepository.save(cartItem);
 
-        if (order.getCartItemSet().stream().allMatch(x -> x.getStatus().equals(status))) {
-            order.setStatus(status);
+        if (order.getCartItemSet().stream().allMatch(item -> item.getStageStatus() == 3)) {
+            order.setStatus(OrderStatus.DELIVERED);
+            order.setUpdatedAt(LocalDateTime.now());
+            orderRepository.save(order);
+        } else if (order.getCartItemSet().stream().allMatch(item -> item.getStageStatus() >= 2)) {
+            order.setStatus(OrderStatus.SHIPPED);
+            order.setUpdatedAt(LocalDateTime.now());
+            orderRepository.save(order);
+        } else if (order.getCartItemSet().stream().allMatch(item -> item.getStageStatus() >= 1)) {
+            order.setStatus(OrderStatus.CONFIRMED);
             order.setUpdatedAt(LocalDateTime.now());
             orderRepository.save(order);
         }

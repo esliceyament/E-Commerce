@@ -24,6 +24,7 @@ public class CartItem {
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+    private int stageStatus;
 
     @ManyToOne
     @JoinColumn(name = "cart_id")
