@@ -50,7 +50,7 @@ public class CartServiceImpl implements CartService {
                 .findFirst();
         if (cartItemOpt.isPresent()) {
             CartItem cartItem = cartItemOpt.get();
-            cartItem.setQuantity(cartItem.getQuantity() + 1);
+            cartItem.setQuantity(updateByOneItemQuantity(payload.getProductCode(), cartItem));  ///proverit
         } else {
             CartItem cartItem = new CartItem();
             cartItem.setProductCode(payload.getProductCode());
@@ -62,6 +62,7 @@ public class CartServiceImpl implements CartService {
             cartItem.setAddedAt(LocalDateTime.now());
             cartItem.setIsRemoved(false);
             cartItem.setStatus(OrderStatus.PENDING);
+            cartItem.setStageStatus(0);
             cartItem.setCart(cart);
 
             cart.getCartItems().add(cartItem);
@@ -69,7 +70,9 @@ public class CartServiceImpl implements CartService {
 
         cart.setTotalPrice(getTotalPrice(cart.getCartItems()));
         cart.setCreatedAt(LocalDateTime.now());
-
+        if (cart.getDiscountCode() != null) {
+            cart.setDiscountPrice(calculateDiscountPrice(cart.getDiscountCode(), cart));
+        }
         cartRepository.save(cart);
 
     }
@@ -93,7 +96,11 @@ public class CartServiceImpl implements CartService {
         cartItem.setIsRemoved(true);
         cartItem.setCart(null);
 
+        cart.getCartItems().remove(cartItem);
         cart.setTotalPrice(cart.getTotalPrice() - removedPrice(cartItem));
+        if (cart.getDiscountCode() != null) {
+            cart.setDiscountPrice(calculateDiscountPrice(cart.getDiscountCode(), cart));
+        }
         cartRepository.save(cart);
     }
 
@@ -115,6 +122,9 @@ public class CartServiceImpl implements CartService {
 
         itemRepository.save(cartItem);
         cart.setTotalPrice(getTotalPrice(cart.getCartItems()));
+        if (cart.getDiscountCode() != null) {
+            cart.setDiscountPrice(calculateDiscountPrice(cart.getDiscountCode(), cart));
+        }
         cartRepository.save(cart);
         return quantity;
     }
@@ -127,6 +137,8 @@ public class CartServiceImpl implements CartService {
                 item.setCart(null);
             });
             cart.setTotalPrice(0D);
+            cart.setDiscountPrice(0D);
+            cart.getCartItems().clear();
         }
 
         cartRepository.save(cart);
@@ -134,6 +146,15 @@ public class CartServiceImpl implements CartService {
 
     public Double useDiscountCode(String code, String authorizationCode) {
         Cart cart = findCart(authorizationCode);
+
+        if (code.isBlank() || code.isEmpty()) {
+            cart.setDiscountCode(null);
+            cart.setDiscountPrice(null);
+            CartResponse response = cartMapper.toResponse(cart);
+            cacheService.cacheCart(cart.getBuyerName(), response);
+            return null;
+        }
+
         DiscountCode discount = discountCodeRepository.findByCode(code)
                 .orElseThrow(() -> new RuntimeException("NotFound"));
 
@@ -157,6 +178,25 @@ public class CartServiceImpl implements CartService {
 
         cartRepository.save(cart);
         return cart.getDiscountPrice();
+    }
+
+    private int updateByOneItemQuantity(Long productCode, CartItem cartItem) {
+        int stock = inventoryFeignClient.getStock(productCode, cartItem.getSelectedAttributes());
+        int quantity = cartItem.getQuantity() + 1;
+        if (quantity > stock) {
+            throw new RuntimeException("Maximum is " + (quantity - 1));
+        }
+        return quantity;
+    }
+
+    private Double calculateDiscountPrice(String code, Cart cart) {
+        DiscountCode discount = discountCodeRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("NotFound"));
+        if (discount.getDiscountType().equals(DiscountType.AMOUNT)) {
+            return cart.getTotalPrice() - discount.getDiscount();
+        } else {
+            return cart.getTotalPrice() * (100 - discount.getDiscount()) / 100;
+        }
     }
 
     private Double removedPrice(CartItem cartItem) {
