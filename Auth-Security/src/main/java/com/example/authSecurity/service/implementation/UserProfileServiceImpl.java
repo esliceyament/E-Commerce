@@ -34,11 +34,10 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final AddressRepository addressRepository;
 
 
-    //////
     public UserProfileDto createOrUpdateUserProfile(UserProfileDto dto) {
-        UserProfile userProfile = userProfileMapper.toEntity(dto);
-        Long userId = getCurrentUserId();
-        userProfile.setUserId(userId);
+        UserProfile userProfile = userProfileRepository.findByUserId(getCurrentUserId())
+                .orElseThrow();
+        userProfile.setDateOfBirth(dto.getDateOfBirth());
         userProfileRepository.save(userProfile);
         return userProfileMapper.toDto(userProfile);
     }
@@ -76,7 +75,6 @@ public class UserProfileServiceImpl implements UserProfileService {
         address.setUserProfile(userProfile);
         userProfile.getAddress().add(address);
         userProfile.getAddress().sort(Comparator.comparing(Address::getLastUsedAt));
-        System.out.println(address);
         userProfileRepository.save(userProfile);
     }
 
@@ -101,15 +99,10 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .orElseThrow(() -> new NotFoundException("User not found!"));
 
         List<Address> addresses = profile.getAddress();
-        System.out.println(addresses);
-        System.out.println("++++++====================================================++++++++++++++++++++++++++");
         if (addresses.isEmpty()) {
             return null;
         }
         Address selectedAddress = addresses.get(addresses.size() - 1);
-        System.out.println(selectedAddress);
-        System.out.println("++++++++++++++++++++++====================================================");
-        System.out.println(selectedAddress);
         AddressDto addressDto = new AddressDto();
         addressDto.setStreet(selectedAddress.getStreet());
         addressDto.setCity(selectedAddress.getCity());

@@ -5,7 +5,6 @@ import com.esliceyament.orderservice.response.CartResponse;
 import com.esliceyament.orderservice.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +18,7 @@ public class CartController {
     @PostMapping("/add-to-cart")
     public ResponseEntity<?> addItemToCart(@RequestBody CartItemPayload payload, @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         cartService.addItemToCart(payload, authorizationHeader);
-        return ResponseEntity.ok(HttpStatus.CREATED);
+        return ResponseEntity.ok("Product added!");
     }
 
     @GetMapping

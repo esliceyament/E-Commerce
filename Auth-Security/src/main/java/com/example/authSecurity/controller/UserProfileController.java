@@ -31,7 +31,6 @@ public class UserProfileController {
         return ResponseEntity.ok(userProfileService.getUserProfile());
     }
 
-////////
     @GetMapping("/get-address")
     public AddressDto getAddress(@RequestHeader("Authorization") String token) {
         return userProfileService.getAddress(token.substring(7));
@@ -39,9 +38,7 @@ public class UserProfileController {
 
     @GetMapping("/get-address-by-id")
     public AddressDto getAddressById(@RequestHeader(HttpHeaders.AUTHORIZATION) String token, Long id) {
-        System.out.println(token);
         token = token.substring(7);
-        System.out.println();
         return userProfileService.getAddressById(token, id);
     }
 

@@ -87,8 +87,15 @@ public class ProductServiceImpl implements ProductService {
     public ProductDto updateProduct(Long productCode, ProductDto dto) {
         Product product = repository.findByProductCode(productCode)
                 .orElseThrow(() -> new NotFoundException("Product not found!"));
+        if (dto.getIsDiscounted() && dto.getDiscountPrice() == null) {
+            throw new RuntimeException("Please write discount price!");
+        }
+        if (!dto.getIsDiscounted()) {
+            product.setDiscountPrice(null);
+        }
         mapper.updateProductFromDto(dto, product);
         repository.save(product);
+        cacheService.cacheProduct(productCode, mapper.toDto(product));
         return mapper.toDto(product);
     }
 

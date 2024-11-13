@@ -56,7 +56,7 @@ public class CartServiceImpl implements CartService {
             CartItem cartItem = new CartItem();
             cartItem.setProductCode(payload.getProductCode());
             cartItem.setProductName(product.getName());
-            cartItem.setSellerName(securityFeignClient.getUsername(authorizationHeader));
+            cartItem.setSellerName(product.getSellerName());
             cartItem.setQuantity(1);
             cartItem.setSelectedAttributes(payload.getSelectedAttributes());
             cartItem.setPricePerUnit(product.getPrice());

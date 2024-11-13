@@ -3,10 +3,12 @@ package com.example.authSecurity.service.implementation;
 import com.example.authSecurity.dto.UserDto;
 import com.example.authSecurity.dto.UserLoginDto;
 import com.example.authSecurity.entity.User;
+import com.example.authSecurity.entity.UserProfile;
 import com.example.authSecurity.enums.Role;
 import com.example.authSecurity.exception.InvalidCredentialsException;
 import com.example.authSecurity.exception.UsernameAlreadyExistsException;
 import com.example.authSecurity.mapper.UserMapper;
+import com.example.authSecurity.repository.UserProfileRepository;
 import com.example.authSecurity.repository.UserRepository;
 import com.example.authSecurity.service.UserService;
 import jakarta.ws.rs.NotFoundException;
@@ -26,6 +28,7 @@ public class UserServiceImpl implements UserService {
 
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
+    private final UserProfileRepository userProfileRepository;
     private final AuthenticationManager authManager;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
     private final UserMapper userMapper;
@@ -42,6 +45,9 @@ public class UserServiceImpl implements UserService {
         user.setStatus(true);
         user.setOrderNumber(getOrderNumber() + 1);
         userRepository.save(user);
+        UserProfile userProfile = new UserProfile();
+        userProfile.setUserId(user.getId());
+        userProfileRepository.save(userProfile);
         return userMapper.toDto(user);
     }
 

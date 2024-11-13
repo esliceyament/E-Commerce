@@ -1,6 +1,5 @@
 package com.example.productservice.dto;
 
-//import com.example.productservice.dto.category.ProductAttribute;
 import com.example.productservice.dto.category.ProductAttribute;
 import lombok.Data;
 
