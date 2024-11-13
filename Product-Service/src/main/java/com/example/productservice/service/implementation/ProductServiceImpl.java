@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -83,7 +85,7 @@ public class ProductServiceImpl implements ProductService {
 
         return mapper.toDto(product);
     }
-
+/////runtime here
     public ProductDto updateProduct(Long productCode, ProductDto dto) {
         Product product = repository.findByProductCode(productCode)
                 .orElseThrow(() -> new NotFoundException("Product not found!"));
@@ -162,6 +164,11 @@ public class ProductServiceImpl implements ProductService {
 
         cacheService.cacheFilteredProducts(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size);
         return productResponse;
+    }
+    public Set<ProductDto> getProductsById(Set<Long> ids) {
+        Set<Product> productSet = repository.findByProductCodeIn(ids);
+        return productSet.stream()
+                .map(mapper::toDto).collect(Collectors.toSet());
     }
 
     private Long getOrderNumber() {

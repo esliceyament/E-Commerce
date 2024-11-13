@@ -15,6 +15,7 @@
         <module name="shared-module" />
         <module name="Api-Gateway" />
         <module name="Product-Service" />
+        <module name="Favourites-Service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -26,6 +27,7 @@
       <module name="Api-Gateway" options="-parameters" />
       <module name="Auth-Security" options="-parameters" />
       <module name="Category-Service" options="-parameters" />
+      <module name="Favourites-Service" options="-parameters" />
       <module name="Inventory-Service" options="-parameters" />
       <module name="Order-Service" options="-parameters" />
       <module name="Product-Service" options="-parameters" />

@@ -40,6 +40,13 @@ spring:
           filters:
             - name: JwtAuthenticationFilter
 
+        - id: Favourites-Service
+          uri: lb://FAVOURITES-SERVICE
+          predicates:
+            - Path=/favourites/**
+          filters:
+            - name: JwtAuthenticationFilter
+
 server:
   port: 8080
 

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/products")
@@ -42,6 +43,12 @@ public class ProductController {
     public ResponseEntity<?> getProductCached(@PathVariable Long productCode) {
         return ResponseEntity.ok(productService.getProductCached(productCode));
     }
+
+    @PostMapping("/get-products-by-id")
+    public ResponseEntity<?> getProductsById(@RequestBody Set<Long> ids) {
+        return ResponseEntity.ok(productService.getProductsById(ids));
+    }
+
 
     @GetMapping("/all")
     public ResponseEntity<PageDto<List<ProductResponse>>> getAllProducts(@RequestParam(value = "page", defaultValue = "1") int page,
@@ -87,5 +94,10 @@ public class ProductController {
         }
 
         return ResponseEntity.ok(imageUrls);
+    }
+
+    @GetMapping("/get-product-by-id")
+    ResponseEntity<?> getProductById(Long id) {
+        return ResponseEntity.ok(productService.getProduct(id));
     }
 }

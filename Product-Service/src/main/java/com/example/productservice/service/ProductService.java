@@ -7,6 +7,7 @@ import com.example.productservice.response.ProductResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public interface ProductService {
@@ -23,5 +24,7 @@ public interface ProductService {
                                                           Boolean isFeatured, Boolean isDiscounted, int page, int size);
     PageDto<List<ProductResponse>> getCachedFilteredProducts(String name, String category, Double minPrice,
                                                                     Double maxPrice, String colour, Double minRating, Double maxRating,
+
                                                                     Boolean isFeatured, Boolean isDiscounted, int page, int size);
+    Set<ProductDto> getProductsById(Set<Long> ids);
 }
