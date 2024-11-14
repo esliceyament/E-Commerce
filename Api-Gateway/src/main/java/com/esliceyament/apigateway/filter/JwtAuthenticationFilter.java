@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                         if (!role.equals("USER") && !role.equals("STORE") && !role.equals("ADMIN")) {
                             return Mono.error(new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied for this role"));
                         }
-                    } else if (path.startsWith("/products") || path.startsWith("/cart") || path.startsWith("/discount")) {
+                    } else if (path.startsWith("/products") || path.startsWith("/cart") || path.startsWith("/discount") || path.startsWith("/categories")) {
                         if (!role.equals("STORE") && !role.equals("ADMIN")) {
                             return Mono.error(new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied for this role"));
                         }
