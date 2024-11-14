@@ -41,12 +41,10 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 
                     String role = jwtUtil.extractRole(authHeader);
 
-                    System.out.println(role);
-
                     String path = exchange.getRequest().getURI().getPath();
 
                     if (path.startsWith("/products/all") || path.startsWith("/products/search") || path.startsWith("/cart/addToCart")
-                            || path.startsWith("/cart/{productCode}") || path.startsWith("/order") || path.startsWith("/return") || path.startsWith("/favourites")) {
+                            || path.startsWith("/cart/{productCode}") || path.startsWith("/order") || path.startsWith("/return") || path.startsWith("/favourites") ||  path.startsWith("/notifications")) {
                         if (!role.equals("USER") && !role.equals("STORE") && !role.equals("ADMIN")) {
                             return Mono.error(new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied for this role"));
                         }

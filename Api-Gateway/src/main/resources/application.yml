@@ -47,6 +47,13 @@ spring:
           filters:
             - name: JwtAuthenticationFilter
 
+        - id: Notifications-Service
+          uri: lb://NOTIFICATIONS-SERVICE
+          predicates:
+            - Path=/notifications/**
+          filters:
+            - name: JwtAuthenticationFilter
+
 server:
   port: 8080
 

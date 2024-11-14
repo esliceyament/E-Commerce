@@ -14,7 +14,7 @@ public interface CategoryMapper {
 
     @Mapping(target = "parentCategoryName", source = "parentCategory.name")
     SubcategoryDto toSubcategoryDto(Category category);
-    @Mapping(target = "parentCategory", ignore = true)  // Parent categories won't have a parent
+    @Mapping(target = "parentCategory", ignore = true)
     Category toCategoryEntity(ParentCategoryDto parentCategoryDto);
 
     // SubcategoryDto to Entity

@@ -13,6 +13,7 @@
         <module name="Service-Discovery" />
         <module name="Auth-Security" />
         <module name="shared-module" />
+        <module name="Notifications-Service" />
         <module name="Api-Gateway" />
         <module name="Product-Service" />
         <module name="Favourites-Service" />
@@ -29,6 +30,7 @@
       <module name="Category-Service" options="-parameters" />
       <module name="Favourites-Service" options="-parameters" />
       <module name="Inventory-Service" options="-parameters" />
+      <module name="Notifications-Service" options="-parameters" />
       <module name="Order-Service" options="-parameters" />
       <module name="Product-Service" options="-parameters" />
       <module name="Service-Discovery" options="-parameters" />

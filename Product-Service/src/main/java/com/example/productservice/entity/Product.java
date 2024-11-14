@@ -36,9 +36,7 @@ public class Product {
 
     private Boolean isFeatured;
     private Boolean isDiscounted;
-    private Double discountPrice; //////
-
-    //samie prodavayemie products
+    private Double discountPrice;
 
     private List<String> imageUrls = new ArrayList<>();
 

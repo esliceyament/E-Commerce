@@ -13,6 +13,7 @@ import com.esliceyament.orderservice.repository.OrderRepository;
 import com.esliceyament.orderservice.response.OrderHistoryResponse;
 import com.esliceyament.orderservice.response.OrderResponse;
 import com.esliceyament.orderservice.service.OrderService;
+import com.esliceyament.shared.payload.NotificationDto;
 import com.esliceyament.shared.payload.OrderedStockUpdate;
 import com.esliceyament.shared.payload.ShippingAddressUpdate;
 import jakarta.ws.rs.BadRequestException;
@@ -98,6 +99,12 @@ public class OrderServiceImpl implements OrderService {
 
         archiveHistory(order);
 
+        NotificationDto notificationDto = new NotificationDto();
+        notificationDto.setUsername(username);
+        notificationDto.setSubject("Order placed!");
+        notificationDto.setBody("Order " + order.getId() + " has been successfully placed! Total price is " + order.getTotalAmount() + "$");
+        eventProducer.sendOrderNotification(notificationDto);
+
         return orderResponse;
 
     }
@@ -121,6 +128,12 @@ public class OrderServiceImpl implements OrderService {
             cartItem.setStageStatus(3);
         }
         itemRepository.save(cartItem);
+
+        NotificationDto notificationDto = new NotificationDto();
+        notificationDto.setUsername(order.getBuyerName());
+        notificationDto.setSubject("Item status!");
+        notificationDto.setBody("Item you ordered has been " + status.toString());
+        eventProducer.sendOrderNotification(notificationDto);
 
         if (order.getCartItemSet().stream().allMatch(item -> item.getStageStatus() == 3)) {
             order.setStatus(OrderStatus.DELIVERED);
@@ -235,9 +248,14 @@ public class OrderServiceImpl implements OrderService {
         if (!order.getStatus().equals(OrderStatus.PENDING) && !order.getStatus().equals(OrderStatus.CONFIRMED)) {
             throw new RuntimeException("You can't cancel order");
         }
-        ///vernut oplatu
         order.setStatus(OrderStatus.CANCELED);
         orderRepository.save(order);
+
+        NotificationDto notificationDto = new NotificationDto();
+        notificationDto.setUsername(order.getBuyerName());
+        notificationDto.setSubject("Cancellation!");
+        notificationDto.setBody("Order " + order.getId() + " has been canceled!");
+        eventProducer.sendOrderNotification(notificationDto);
     }
 
     private void archiveHistory(Order order) {
