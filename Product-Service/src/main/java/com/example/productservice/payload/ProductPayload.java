@@ -1,6 +1,7 @@
 package com.example.productservice.payload;
 
 import com.example.productservice.dto.category.AttributesPayload;
+import com.example.productservice.enums.Genders;
 import lombok.Data;
 
 import java.util.List;
@@ -14,6 +15,7 @@ public class ProductPayload {
 
     private String categoryName;
     private List<AttributesPayload> productAttributes;
+    private Genders gender;
 
     private String colour;
     private InventoryPayload stock;

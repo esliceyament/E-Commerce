@@ -1,6 +1,7 @@
 package com.example.productservice.entity;
 
 import com.example.productservice.dto.category.ProductAttribute;
+import com.example.productservice.enums.Genders;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Id;
 import lombok.Data;
@@ -23,6 +24,7 @@ public class Product {
     private String categoryName;
     @Embedded
     private Set<ProductAttribute> productAttributes;
+    private Genders gender;
 
     private String sellerName;
 

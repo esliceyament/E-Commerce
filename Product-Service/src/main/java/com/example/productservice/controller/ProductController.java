@@ -2,6 +2,7 @@ package com.example.productservice.controller;
 
 import com.example.productservice.dto.PageDto;
 import com.example.productservice.dto.ProductDto;
+import com.example.productservice.enums.Genders;
 import com.example.productservice.payload.ProductPayload;
 import com.example.productservice.response.ProductResponse;
 import com.example.productservice.service.ProductService;
@@ -72,9 +73,10 @@ public class ProductController {
                                             @RequestParam(required = false) Double maxRating,
                                             @RequestParam(required = false) Boolean isFeatured,
                                             @RequestParam(required = false) Boolean isDiscounted,
+                                            @RequestParam(required = false) Genders genders,
                                             @RequestParam(value = "page", defaultValue = "1") int page,
                                             @RequestParam(value = "size", defaultValue = "15") int size) {
-        return ResponseEntity.ok(productService.getCachedFilteredProducts(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size));
+        return ResponseEntity.ok(productService.getCachedFilteredProducts(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, genders, page, size));
     }
 
     @PutMapping("/move")

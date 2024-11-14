@@ -4,6 +4,7 @@ import com.example.productservice.dto.PageDto;
 import com.example.productservice.dto.ProductDto;
 import com.example.productservice.dto.category.Category;
 import com.example.productservice.entity.Product;
+import com.example.productservice.enums.Genders;
 import com.example.productservice.exception.NotFoundException;
 import com.example.productservice.feign.CategoryFeignClient;
 import com.example.productservice.feign.InventoryFeignClient;
@@ -148,21 +149,21 @@ public class ProductServiceImpl implements ProductService {
 
     public PageDto<List<ProductResponse>> filterProducts(String name, String category, Double minPrice,
                                                          Double maxPrice, String colour, Double minRating, Double maxRating,
-                                                         Boolean isFeatured, Boolean isDiscounted, int page, int size) {
-        return filterRepository.findProductsByFilter(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size);
+                                                         Boolean isFeatured, Boolean isDiscounted, Genders gender, int page, int size) {
+        return filterRepository.findProductsByFilter(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, gender, page, size);
     }
 
     public PageDto<List<ProductResponse>> getCachedFilteredProducts(String name, String category, Double minPrice,
                                                          Double maxPrice, String colour, Double minRating, Double maxRating,
-                                                         Boolean isFeatured, Boolean isDiscounted, int page, int size) {
-        PageDto<List<ProductResponse>> productCachedResponse = cacheService.getCachedFilteredProducts(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size);
+                                                         Boolean isFeatured, Boolean isDiscounted, Genders gender, int page, int size) {
+        PageDto<List<ProductResponse>> productCachedResponse = cacheService.getCachedFilteredProducts(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, gender, page, size);
         if (productCachedResponse != null) {
             return productCachedResponse;
         }
 
-        PageDto<List<ProductResponse>> productResponse = filterProducts(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size);
+        PageDto<List<ProductResponse>> productResponse = filterProducts(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, gender, page, size);
 
-        cacheService.cacheFilteredProducts(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size);
+        cacheService.cacheFilteredProducts(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, gender, page, size);
         return productResponse;
     }
     public Set<ProductDto> getProductsById(Set<Long> ids) {

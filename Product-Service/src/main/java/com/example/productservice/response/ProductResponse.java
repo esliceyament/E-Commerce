@@ -3,6 +3,7 @@ package com.example.productservice.response;
 //import com.example.productservice.dto.category.ProductAttribute;
 
 import com.example.productservice.dto.category.ProductAttribute;
+import com.example.productservice.enums.Genders;
 import lombok.Data;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class ProductResponse {
 
     private String categoryName;
     private List<ProductAttribute> productAttributes;
+    private Genders gender;
 
     private String sellerName;
 

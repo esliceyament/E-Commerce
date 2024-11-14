@@ -2,6 +2,7 @@ package com.example.productservice.service.cache;
 
 import com.example.productservice.dto.PageDto;
 import com.example.productservice.dto.ProductDto;
+import com.example.productservice.enums.Genders;
 import com.example.productservice.repository.ProductFilterRepository;
 import com.example.productservice.response.ProductResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,9 +38,9 @@ public class ProductCacheService {
 
     public void cacheFilteredProducts(String name, String category, Double minPrice,
                                       Double maxPrice, String colour, Double minRating, Double maxRating,
-                                      Boolean isFeatured, Boolean isDiscounted, int page, int size) {
-        String cacheKey = buildCacheKey(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size);
-        PageDto<List<ProductResponse>> result = filterRepository.findProductsByFilter(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size);
+                                      Boolean isFeatured, Boolean isDiscounted, Genders gender, int page, int size) {
+        String cacheKey = buildCacheKey(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, gender.toString(), page, size);
+        PageDto<List<ProductResponse>> result = filterRepository.findProductsByFilter(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, gender, page, size);
         try (Jedis jedis = jedisPool.getResource()) {
             String jsonProduct = mapper.writeValueAsString(result);
             jedis.setex(cacheKey, CACHE_TTL_SECONDS, jsonProduct);
@@ -50,9 +51,9 @@ public class ProductCacheService {
 
     public String buildCacheKey(String name, String category, Double minPrice,
                                       Double maxPrice, String colour, Double minRating, Double maxRating,
-                                      Boolean isFeatured, Boolean isDiscounted, int page, int size) {
+                                      Boolean isFeatured, Boolean isDiscounted, String gender, int page, int size) {
         return PRODUCT_CACHE_KEY_PREFIX + "_" + name + "_" + category + "_" + minPrice + "_" + maxPrice + "_" + colour + "_"
-                + minRating + "_" + maxRating + "_" + isFeatured + "_" + isDiscounted + "_" + page + "_" + size;
+                + minRating + "_" + maxRating + "_" + isFeatured + "_" + isDiscounted + "_" + gender + "_" + page + "_" + size;
     }
 
     public ProductDto getCachedProduct(Long productCode) {
@@ -69,8 +70,8 @@ public class ProductCacheService {
 
     public PageDto<List<ProductResponse>> getCachedFilteredProducts(String name, String category, Double minPrice,
                                                          Double maxPrice, String colour, Double minRating, Double maxRating,
-                                                         Boolean isFeatured, Boolean isDiscounted, int page, int size) {
-        String cacheKey = buildCacheKey(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, page, size);
+                                                         Boolean isFeatured, Boolean isDiscounted, Genders gender,  int page, int size) {
+        String cacheKey = buildCacheKey(name, category, minPrice, maxPrice, colour, minRating, maxRating, isFeatured, isDiscounted, gender.toString(), page, size);
         try (Jedis jedis = jedisPool.getResource()) {
             String jsonProduct = jedis.get(cacheKey);
             if (jsonProduct != null) {

@@ -2,6 +2,7 @@ package com.example.productservice.repository;
 
 import com.example.productservice.dto.PageDto;
 import com.example.productservice.entity.Product;
+import com.example.productservice.enums.Genders;
 import com.example.productservice.mapper.ProductMapper;
 import com.example.productservice.response.ProductResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -24,7 +27,7 @@ public class ProductFilterRepository {
 
     public PageDto<List<ProductResponse>> findProductsByFilter(String name, String category, Double minPrice,
                                                                Double maxPrice, String colour, Double minRating, Double maxRating,
-                                                               Boolean isFeatured, Boolean isDiscounted, int page, int size) {
+                                                               Boolean isFeatured, Boolean isDiscounted, Genders gender, int page, int size) {
         Query query = new Query();
 
         if (name != null && !name.isEmpty()) {
@@ -64,6 +67,17 @@ public class ProductFilterRepository {
         }
         if (isDiscounted != null) {
             query.addCriteria(Criteria.where("isDiscounted").is(isDiscounted));
+        }
+        if (gender != null) {
+            List<String> genderOptions;
+            if (gender.toString().equalsIgnoreCase("MALE")) {
+                genderOptions = Arrays.asList("MALE", "UNISEX");
+            } else if (gender.toString().equalsIgnoreCase("FEMALE")) {
+                genderOptions = Arrays.asList("FEMALE", "UNISEX");
+            } else {
+                genderOptions = Collections.singletonList(gender.toString().toUpperCase());
+            }
+            query.addCriteria(Criteria.where("gender").in(genderOptions));
         }
 
         Pageable pageable = PageRequest.of(page - 1, size);
