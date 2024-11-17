@@ -6,12 +6,12 @@ import com.example.authSecurity.entity.User;
 import com.example.authSecurity.entity.UserProfile;
 import com.example.authSecurity.enums.Role;
 import com.example.authSecurity.exception.InvalidCredentialsException;
+import com.example.authSecurity.exception.ProfileNotFoundException;
 import com.example.authSecurity.exception.UsernameAlreadyExistsException;
 import com.example.authSecurity.mapper.UserMapper;
 import com.example.authSecurity.repository.UserProfileRepository;
 import com.example.authSecurity.repository.UserRepository;
 import com.example.authSecurity.service.UserService;
-import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
             Authentication authentication = authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword()));
             User user = userRepository.findByUsername(dto.getUsername())
-                    .orElseThrow(() -> new NotFoundException("User " + dto.getUsername() + " not found!"));
+                    .orElseThrow(() -> new ProfileNotFoundException("User " + dto.getUsername() + " not found!"));
             return jwtUtil.generateToken(dto.getUsername(), user.getRole().toString());
         } catch (BadCredentialsException e) {
             throw new InvalidCredentialsException("Invalid username or password.");

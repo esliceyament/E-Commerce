@@ -13,7 +13,6 @@ import com.example.authSecurity.repository.AddressRepository;
 import com.example.authSecurity.repository.UserProfileRepository;
 import com.example.authSecurity.repository.UserRepository;
 import com.example.authSecurity.service.UserProfileService;
-import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -44,7 +43,7 @@ public class UserProfileServiceImpl implements UserProfileService {
  //////
     public AddressDto addAddress(AddressDto dto) {
         UserProfile userProfile = userProfileRepository.findByUserId(getCurrentUserId())
-                .orElseThrow(() -> new NotFoundException("User not found!"));
+                .orElseThrow(() -> new ProfileNotFoundException("User not found!"));
         Address address = new Address();
         address.setStreet(dto.getStreet());
         address.setCity(dto.getCity());
@@ -63,9 +62,9 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Transactional
     public void addShippingAddress(ShippingAddressUpdate shippingAddressUpdate) {
         User user = userRepository.findByUsername(shippingAddressUpdate.getUsername())
-                .orElseThrow(() -> new NotFoundException("User " + shippingAddressUpdate.getUsername() + " not found!"));
+                .orElseThrow(() -> new ProfileNotFoundException("User " + shippingAddressUpdate.getUsername() + " not found!"));
         UserProfile userProfile = userProfileRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new NotFoundException("User not found!"));
+                .orElseThrow(() -> new ProfileNotFoundException("User not found!"));
         Address address = new Address();
         address.setStreet(shippingAddressUpdate.getStreet());
         address.setCity(shippingAddressUpdate.getCity());
@@ -93,10 +92,10 @@ public class UserProfileServiceImpl implements UserProfileService {
     public AddressDto getAddress(String token) {
         String username = jwtUtil.extractUsername(token);
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("User " + username + " not found!"));
+                .orElseThrow(() -> new ProfileNotFoundException("User " + username + " not found!"));
 
         UserProfile profile = userProfileRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new NotFoundException("User not found!"));
+                .orElseThrow(() -> new ProfileNotFoundException("User not found!"));
 
         List<Address> addresses = profile.getAddress();
         if (addresses.isEmpty()) {
@@ -114,10 +113,10 @@ public class UserProfileServiceImpl implements UserProfileService {
     public AddressDto getAddressById(String token, Long id) {
         String username = jwtUtil.extractUsername(token);
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("User " + username + " not found!"));
+                .orElseThrow(() -> new ProfileNotFoundException("User " + username + " not found!"));
 
         UserProfile profile = userProfileRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new NotFoundException("User not found!"));
+                .orElseThrow(() -> new ProfileNotFoundException("User not found!"));
         Address selectedAddress = profile.getAddress().stream()
                 .filter(address -> address.getId().equals(id))
                 .findFirst().orElse(null);
@@ -135,11 +134,11 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     public void updateDefaultAddress(Long addressId) {
         Address address = addressRepository.findById(addressId)
-                        .orElseThrow(() -> new NotFoundException("Address not found!"));
+                        .orElseThrow(() -> new ProfileNotFoundException("Address not found!"));
         address.setLastUsedAt(new Date());
         Long userId = address.getUserProfile().getUserId();
         UserProfile profile = userProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("User not found!"));
+                .orElseThrow(() -> new ProfileNotFoundException("User not found!"));
 
         profile.getAddress().sort(Comparator.comparing(Address::getLastUsedAt));
         userProfileRepository.save(profile);
