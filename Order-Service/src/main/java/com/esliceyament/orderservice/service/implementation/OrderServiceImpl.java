@@ -2,6 +2,10 @@ package com.esliceyament.orderservice.service.implementation;
 
 import com.esliceyament.orderservice.entity.*;
 import com.esliceyament.orderservice.enums.OrderStatus;
+import com.esliceyament.orderservice.exception.AddressNotProvidedException;
+import com.esliceyament.orderservice.exception.NotFoundException;
+import com.esliceyament.orderservice.exception.OrderAlreadyCanceledException;
+import com.esliceyament.orderservice.exception.OrderCancellationNotAllowedException;
 import com.esliceyament.orderservice.feign.SecurityFeignClient;
 import com.esliceyament.orderservice.kafka.OrderEventProducer;
 import com.esliceyament.orderservice.mapper.CartItemMapper;
@@ -46,13 +50,13 @@ public class OrderServiceImpl implements OrderService {
         if (addressId != null) {
             selectedAddress = securityFeignClient.getAddressById(authorizationHeader, addressId);
             if (selectedAddress == null) {
-                throw new RuntimeException("Address not found for the provided address ID.");
+                throw new NotFoundException("Address not found for the provided address ID.");
             }
             securityFeignClient.updateDefaultAddress(addressId);
         } else {
             selectedAddress = securityFeignClient.getAddress(authorizationHeader);
             if (selectedAddress == null) {
-                throw new RuntimeException("Please provide ad address!");
+                throw new AddressNotProvidedException("Please provide an address!");
             }
         }
 
@@ -112,12 +116,12 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponse updateOrder(Long id, OrderStatus status) {
         CartItem cartItem = itemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Not found!"));
+                .orElseThrow(() -> new NotFoundException("Not found!"));
 
         Order order = orderRepository.findById(cartItem.getOrder().getId())
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseThrow(() -> new NotFoundException("Cart is not found!"));
         if (order.getStatus() == OrderStatus.CANCELED) {
-            throw new RuntimeException("The order was canceled");
+            throw new OrderAlreadyCanceledException("The order was canceled");
         }
         cartItem.setStatus(status);
         if (status == OrderStatus.CONFIRMED) {
@@ -166,7 +170,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse getOrder(Long id, String authorizationHeader) {
         String username = securityFeignClient.getUsername(authorizationHeader);
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new NotFoundException("Order not found " + id));
         if (!username.equals(order.getBuyerName())) {
             throw new BadRequestException();
         }
@@ -188,7 +192,7 @@ public class OrderServiceImpl implements OrderService {
         String username = securityFeignClient.getUsername(authorizationHeader);
 
         OrderHistory history = historyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No history"));
+                .orElseThrow(() -> new NotFoundException("No history"));
         if (!username.equals(history.getUsername())) {
             throw new BadRequestException();
         }
@@ -212,14 +216,14 @@ public class OrderServiceImpl implements OrderService {
     public Address updateShippingAddress(Address address, Long id, String authorizationHeader) {
         String username = securityFeignClient.getUsername(authorizationHeader);
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Not found"));
+                .orElseThrow(() -> new NotFoundException("Order not found " + id));
 
         if (!username.equals(order.getBuyerName())) {
             throw new BadRequestException();
         }
 
         if (!order.getStatus().equals(OrderStatus.PENDING)) {
-            throw new RuntimeException("You can't change address");
+            throw new AddressNotProvidedException("You can't change address");
         }
 
         order.setShippingAddress(address);
@@ -241,12 +245,12 @@ public class OrderServiceImpl implements OrderService {
     public void cancelOrder(Long id, String authorizationHeader) {
         String username = securityFeignClient.getUsername(authorizationHeader);
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Not found"));
+                .orElseThrow(() -> new NotFoundException("Order not found " + id));
         if (!username.equals(order.getBuyerName())) {
             throw new BadRequestException();
         }
         if (!order.getStatus().equals(OrderStatus.PENDING) && !order.getStatus().equals(OrderStatus.CONFIRMED)) {
-            throw new RuntimeException("You can't cancel order");
+            throw new OrderCancellationNotAllowedException("You can't cancel order");
         }
         order.setStatus(OrderStatus.CANCELED);
         orderRepository.save(order);

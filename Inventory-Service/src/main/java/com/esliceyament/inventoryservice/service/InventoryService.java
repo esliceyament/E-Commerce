@@ -1,6 +1,7 @@
 package com.esliceyament.inventoryservice.service;
 
 import com.esliceyament.inventoryservice.entity.Inventory;
+import com.esliceyament.inventoryservice.exception.NotFoundException;
 import com.esliceyament.inventoryservice.kafka.InventoryEventProducer;
 import com.esliceyament.inventoryservice.payload.InventoryPayload;
 import com.esliceyament.inventoryservice.repository.InventoryRepository;
@@ -32,11 +33,11 @@ public class InventoryService {
     }
     public Inventory getInventory(Long productCode) {
         return inventoryRepository.findByProductCode(productCode)
-                .orElseThrow(() -> new IllegalStateException("Not found"));
+                .orElseThrow(() -> new NotFoundException("Not found"));
     }
     public int getStock(Long productCode, String value) {
         Inventory inventory = inventoryRepository.findByProductCode(productCode)
-                .orElseThrow(() -> new IllegalStateException("Not found"));
+                .orElseThrow(() -> new NotFoundException("Not found"));
 
         if (value != null) {
             return inventory.getAttributeStock().getOrDefault(value, 0);
@@ -49,7 +50,7 @@ public class InventoryService {
     @Transactional
     public void updateStock(Long productCode, String value, int quantity) {
         Inventory inventory = inventoryRepository.findByProductCode(productCode)
-                .orElseThrow(() -> new IllegalStateException("Not found"));
+                .orElseThrow(() -> new NotFoundException("Not found"));
 
         if (value != null && inventory.getAttributeStock().containsKey(value)) {
             int newStock = inventory.getAttributeStock().get(value) - quantity;
@@ -57,14 +58,14 @@ public class InventoryService {
             if (newStock >= 0) {
                 inventory.getAttributeStock().put(value, newStock);
             } else {
-                throw new IllegalStateException("Not found");
+                throw new NotFoundException("Not found");
             }
         }
         else {
             if (inventory.getTotalStock() >= quantity) {
                 inventory.setTotalStock(inventory.getTotalStock() - quantity);
             } else {
-                throw new IllegalStateException("Not found");
+                throw new NotFoundException("Not found");
             }
         }
         inventoryRepository.save(inventory);

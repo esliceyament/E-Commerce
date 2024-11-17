@@ -4,6 +4,8 @@ import com.esliceyament.orderservice.entity.Order;
 import com.esliceyament.orderservice.entity.ReturnRequest;
 import com.esliceyament.orderservice.enums.OrderStatus;
 import com.esliceyament.orderservice.enums.ReturnStatus;
+import com.esliceyament.orderservice.exception.NotFoundException;
+import com.esliceyament.orderservice.exception.ReturnRequestNotAllowed;
 import com.esliceyament.orderservice.feign.SecurityFeignClient;
 import com.esliceyament.orderservice.mapper.ReturnMapper;
 import com.esliceyament.orderservice.payload.ReturnPayload;
@@ -31,12 +33,12 @@ public class ReturnServiceImpl implements ReturnService {
     public ReturnResponse returnOrder(Long id, ReturnPayload payload, String authorizationHeader) {
         String username = securityFeignClient.getUsername(authorizationHeader);
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found!"));
+                .orElseThrow(() -> new NotFoundException("Order not found " + id));
         if (!username.equals(order.getBuyerName())) {
             throw new BadRequestException();
         }
         if (!order.getStatus().equals(OrderStatus.SHIPPED) && !order.getStatus().equals(OrderStatus.DELIVERED)) {
-            throw new RuntimeException("You can't return it for now");
+            throw new ReturnRequestNotAllowed("You can't return it for now");
         }
         ReturnRequest returnRequest = new ReturnRequest();
         returnRequest.setReason(payload.getReason());
@@ -54,7 +56,7 @@ public class ReturnServiceImpl implements ReturnService {
     public ReturnResponse getReturnRequest(Long id, String authorizationHeader) {
         String username = securityFeignClient.getUsername(authorizationHeader);
         ReturnRequest request = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cannot find"));
+                .orElseThrow(() -> new NotFoundException("Cannot find"));
         if (!request.getBuyerName().equals(username)) {
             throw new BadRequestException();
         }
@@ -64,7 +66,7 @@ public class ReturnServiceImpl implements ReturnService {
     @Override
     public ReturnResponse updateReturnRequest(Long id, ReturnStatus status) {
         ReturnRequest request = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Not found"));
+                .orElseThrow(() -> new NotFoundException("Request not found!"));
         request.setStatus(status);
         if (status.equals(ReturnStatus.APPROVED)) {
             request.setApprovalDate(LocalDateTime.now());

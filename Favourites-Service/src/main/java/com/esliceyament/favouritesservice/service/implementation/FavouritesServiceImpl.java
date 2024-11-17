@@ -3,6 +3,7 @@ package com.esliceyament.favouritesservice.service.implementation;
 import com.esliceyament.favouritesservice.dto.FavoriteProductDTO;
 import com.esliceyament.favouritesservice.dto.ProductDto;
 import com.esliceyament.favouritesservice.entity.Favourites;
+import com.esliceyament.favouritesservice.exception.NotFoundException;
 import com.esliceyament.favouritesservice.feign.ProductFeignClient;
 import com.esliceyament.favouritesservice.feign.SecurityFeignClient;
 import com.esliceyament.favouritesservice.mapper.ProductMapper;
@@ -27,9 +28,8 @@ public class FavouritesServiceImpl implements FavouritesService {
     @Override
     public void addToFavourites(Long productCode, String authorizationHeader) {
         ProductDto productDTO = productFeignClient.getProductCached(productCode).getBody();
-        System.out.println(productDTO);
         if (productDTO == null) {
-            throw new RuntimeException("Product not found");
+            throw new NotFoundException("Product " + productCode + " not found");
         }
         String username = securityFeignClient.getUsername(authorizationHeader);
 
@@ -52,7 +52,7 @@ public class FavouritesServiceImpl implements FavouritesService {
     public void deleteFromFavourites(Long id, String authorizationHeader) {
         String username = securityFeignClient.getUsername(authorizationHeader);
         Favourites favourites = repository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Not found"));
+                .orElseThrow(() -> new NotFoundException("Not found"));
         Long favouriteItem = favourites.getProductIds().stream().filter(item -> item.equals(id))
                 .findFirst().orElseThrow();
         favourites.getProductIds().remove(favouriteItem);

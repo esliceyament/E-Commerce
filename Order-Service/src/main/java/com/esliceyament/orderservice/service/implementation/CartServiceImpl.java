@@ -6,6 +6,10 @@ import com.esliceyament.orderservice.entity.CartItem;
 import com.esliceyament.orderservice.entity.DiscountCode;
 import com.esliceyament.orderservice.enums.DiscountType;
 import com.esliceyament.orderservice.enums.OrderStatus;
+import com.esliceyament.orderservice.exception.DiscountNotActiveException;
+import com.esliceyament.orderservice.exception.NotFoundException;
+import com.esliceyament.orderservice.exception.QuantityOutOfStockException;
+import com.esliceyament.orderservice.exception.UsedDiscountException;
 import com.esliceyament.orderservice.feign.InventoryFeignClient;
 import com.esliceyament.orderservice.feign.ProductFeignClient;
 import com.esliceyament.orderservice.feign.SecurityFeignClient;
@@ -41,7 +45,7 @@ public class CartServiceImpl implements CartService {
         ResponseEntity<Product> productResponse = productFeignClient.getProduct(payload.getProductCode());
         Product product = productResponse.getBody();
         if (product == null) {
-            throw new RuntimeException("Product not found");
+            throw new NotFoundException("Product not found");
         }
 
         Cart cart = findCart(authorizationHeader);
@@ -93,7 +97,7 @@ public class CartServiceImpl implements CartService {
         CartItem cartItem = cart.getCartItems().stream()
                 .filter(item -> item.getProductCode().equals(productCode) && !item.getIsRemoved())
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Item not found"));
+                .orElseThrow(() -> new NotFoundException("Item not found"));
 
         cartItem.setIsRemoved(true);
         cartItem.setCart(null);
@@ -111,11 +115,11 @@ public class CartServiceImpl implements CartService {
         CartItem cartItem = cart.getCartItems().stream()
                         .filter(item -> item.getProductCode().equals(productCode))
                                 .findFirst()
-                                        .orElseThrow(() -> new RuntimeException("Product with code " + productCode + " not found in cart."));
+                                        .orElseThrow(() -> new NotFoundException("Product with code " + productCode + " not found in cart."));
 
         int stock = inventoryFeignClient.getStock(productCode, cartItem.getSelectedAttributes());
         if (quantity > stock || cartItem.getQuantity() <= 0) {
-            throw new RuntimeException("Choose appropriate quantity");
+            throw new QuantityOutOfStockException("You cannot choose " + quantity + " items!");
         }
 
         cartItem.setQuantity(quantity);
@@ -155,14 +159,14 @@ public class CartServiceImpl implements CartService {
         }
 
         DiscountCode discount = discountCodeRepository.findByCode(code)
-                .orElseThrow(() -> new RuntimeException("NotFound"));
+                .orElseThrow(() -> new NotFoundException("No such discount!"));
 
         if (!discount.isActive()) {
-            throw new RuntimeException("Is not active");
+            throw new DiscountNotActiveException("This discount is not active!");
         }
 
         if (cart.getDiscountCodes().contains(discount.getCode())) {
-            throw new RuntimeException("This code was used");
+            throw new UsedDiscountException("This code was used");
         }
 
         double discountPrice = calculateDiscountPrice(code, cart);
@@ -179,14 +183,14 @@ public class CartServiceImpl implements CartService {
         int stock = inventoryFeignClient.getStock(productCode, cartItem.getSelectedAttributes());
         int quantity = cartItem.getQuantity() + 1;
         if (quantity > stock) {
-            throw new RuntimeException("Maximum is " + (quantity - 1));
+            throw new QuantityOutOfStockException("Maximum quantity is " + (quantity - 1));
         }
         return quantity;
     }
 
     private Double calculateDiscountPrice(String code, Cart cart) {
         DiscountCode discount = discountCodeRepository.findByCode(code)
-                .orElseThrow(() -> new RuntimeException("NotFound"));
+                .orElseThrow(() -> new NotFoundException("Not found such discount!"));
         if (discount.getDiscountType().equals(DiscountType.AMOUNT)) {
             return cart.getTotalPrice() - discount.getDiscount();
         } else {
