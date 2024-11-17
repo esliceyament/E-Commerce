@@ -5,6 +5,7 @@ import com.example.productservice.dto.ProductDto;
 import com.example.productservice.dto.category.Category;
 import com.example.productservice.entity.Product;
 import com.example.productservice.enums.Genders;
+import com.example.productservice.exception.DiscountPriceException;
 import com.example.productservice.exception.NotFoundException;
 import com.example.productservice.feign.CategoryFeignClient;
 import com.example.productservice.feign.InventoryFeignClient;
@@ -86,12 +87,12 @@ public class ProductServiceImpl implements ProductService {
 
         return mapper.toDto(product);
     }
-/////runtime here
+
     public ProductDto updateProduct(Long productCode, ProductDto dto) {
         Product product = repository.findByProductCode(productCode)
                 .orElseThrow(() -> new NotFoundException("Product not found!"));
         if (dto.getIsDiscounted() && dto.getDiscountPrice() == null) {
-            throw new RuntimeException("Please write discount price!");
+            throw new DiscountPriceException("Please write discount price!");
         }
         if (!dto.getIsDiscounted()) {
             product.setDiscountPrice(null);

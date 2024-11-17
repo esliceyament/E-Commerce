@@ -27,7 +27,7 @@ public class Attributes {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")                       //////////////////// FETCH TYPE
+    @JoinColumn(name = "category_id")
     private Category category;
 
 

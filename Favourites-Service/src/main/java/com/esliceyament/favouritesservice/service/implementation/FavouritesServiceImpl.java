@@ -47,7 +47,7 @@ public class FavouritesServiceImpl implements FavouritesService {
         favourites.getProductIds().add(productDTO.getProductCode());
         repository.save(favourites);
     }
-///imageurl v produkte list a zdes string rewit, rewit eto i v ordere i v carte
+
     @Override
     public void deleteFromFavourites(Long id, String authorizationHeader) {
         String username = securityFeignClient.getUsername(authorizationHeader);

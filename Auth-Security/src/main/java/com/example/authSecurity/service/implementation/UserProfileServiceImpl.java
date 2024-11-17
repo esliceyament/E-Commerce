@@ -40,7 +40,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         userProfileRepository.save(userProfile);
         return userProfileMapper.toDto(userProfile);
     }
- //////
+
     public AddressDto addAddress(AddressDto dto) {
         UserProfile userProfile = userProfileRepository.findByUserId(getCurrentUserId())
                 .orElseThrow(() -> new ProfileNotFoundException("User not found!"));

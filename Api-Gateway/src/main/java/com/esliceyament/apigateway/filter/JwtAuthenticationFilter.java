@@ -12,9 +12,6 @@ import reactor.core.publisher.Mono;
 @Component
 public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAuthenticationFilter.Config> {
 
-
-
-    //////////////////////////////////////////blacklist in redis
     @Autowired
     private JwtUtil jwtUtil;
 

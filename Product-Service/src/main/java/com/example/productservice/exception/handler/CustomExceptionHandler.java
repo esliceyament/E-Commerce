@@ -2,6 +2,7 @@ package com.example.productservice.exception.handler;
 
 import com.example.productservice.dto.ExceptionDto;
 import com.example.productservice.exception.AlreadyExistsException;
+import com.example.productservice.exception.DiscountPriceException;
 import com.example.productservice.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,5 +22,11 @@ public class CustomExceptionHandler {
     @ResponseStatus(HttpStatus.ALREADY_REPORTED)
     public ExceptionDto handleAlreadyExists(AlreadyExistsException alreadyExistsException) {
         return new ExceptionDto(HttpStatus.ALREADY_REPORTED.value(), alreadyExistsException.getMessage());
+    }
+
+    @ExceptionHandler(DiscountPriceException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDto handleDiscountPriceException(DiscountPriceException discountPriceException) {
+        return new ExceptionDto(HttpStatus.BAD_REQUEST.value(), discountPriceException.getMessage());
     }
 }
