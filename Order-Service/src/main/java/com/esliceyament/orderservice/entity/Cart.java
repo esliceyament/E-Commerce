@@ -36,7 +36,7 @@ public class Cart {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id); // Only use fields that uniquely identify Cart
+        return Objects.hash(id);
     }
 
     @Override
